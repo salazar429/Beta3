@@ -1,103 +1,77 @@
 // ===========================================
-// APP DUEÑO - FUNCIONALIDAD COMPLETA CORREGIDA
+// APP DUEÑO - VERSIÓN CON FUNCIONES GLOBALES
 // ===========================================
 
-// CONFIGURACIÓN - CAMBIA ESTO POR TU URL DE RENDER
-const API_URL = 'https://sistema-test-api.onrender.com'; // TU URL DE RENDER
+const API_URL = 'https://sistema-test-api.onrender.com';
 
+// ========== FUNCIONES GLOBALES PARA LOS ONCLICK ==========
+function toggleFormVendedora() {
+    const form = document.getElementById('formAgregarVendedora');
+    const btn = document.getElementById('btnToggleFormVendedora');
+    
+    if (form.style.display === 'none' || form.style.display === '') {
+        form.style.display = 'block';
+        btn.innerHTML = '<span>✖️</span><span>Cerrar</span>';
+    } else {
+        form.style.display = 'none';
+        btn.innerHTML = '<span>➕</span><span>Agregar Vendedora</span>';
+    }
+}
+
+function toggleFormProducto() {
+    const form = document.getElementById('formAgregarProducto');
+    const btn = document.getElementById('btnToggleFormProducto');
+    
+    if (form.style.display === 'none' || form.style.display === '') {
+        form.style.display = 'block';
+        btn.innerHTML = '<span>✖️</span><span>Cerrar</span>';
+    } else {
+        form.style.display = 'none';
+        btn.innerHTML = '<span>➕</span><span>Agregar Producto</span>';
+    }
+}
+
+function switchPage(page) {
+    // Actualizar menú
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.page === page) {
+            item.classList.add('active');
+        }
+    });
+    
+    // Mostrar sección
+    document.querySelectorAll('.page-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    document.getElementById(`${page}Section`).classList.add('active');
+    
+    // Controlar buscador
+    const searchContainer = document.getElementById('searchContainer');
+    if (page === 'vendedoras' || page === 'productos') {
+        searchContainer.classList.add('visible');
+        App.updateFilterTabs(page);
+        document.getElementById('searchInput').value = '';
+    } else {
+        searchContainer.classList.remove('visible');
+    }
+    
+    App.currentPage = page;
+}
+
+// ========== OBJETO APP CON TODA LA LÓGICA ==========
 const App = {
     productoActual: null,
     currentPage: 'dashboard',
     
     init() {
         console.log('App iniciada');
-        this.setupEventListeners();
         this.testServerConnection();
-        this.setupNavigation();
         this.setupSearch();
         this.setupDataManagementButtons();
-        this.setupToggleForms();
     },
     
-    // ========== NAVEGACIÓN ==========
-    setupNavigation() {
-        const navItems = document.querySelectorAll('.nav-item');
-        navItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                const page = item.dataset.page;
-                this.switchPage(page);
-            });
-        });
-    },
-    
-    switchPage(page) {
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.remove('active');
-            if (item.dataset.page === page) {
-                item.classList.add('active');
-            }
-        });
-        
-        document.querySelectorAll('.page-section').forEach(section => {
-            section.classList.remove('active');
-        });
-        document.getElementById(`${page}Section`).classList.add('active');
-        
-        const searchContainer = document.getElementById('searchContainer');
-        if (page === 'vendedoras' || page === 'productos') {
-            searchContainer.classList.add('visible');
-            this.updateFilterTabs(page);
-            document.getElementById('searchInput').value = '';
-        } else {
-            searchContainer.classList.remove('visible');
-        }
-        
-        this.currentPage = page;
-    },
-    
-    // ========== TOGGLE FORMULARIOS ==========
-    setupToggleForms() {
-        console.log('Configurando toggle forms');
-        
-        // Toggle formulario vendedora
-        const btnToggleVendedora = document.getElementById('btnToggleFormVendedora');
-        const formVendedora = document.getElementById('formAgregarVendedora');
-        
-        if (btnToggleVendedora) {
-            console.log('Botón vendedora encontrado');
-            btnToggleVendedora.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log('Click en botón vendedora');
-                formVendedora.classList.toggle('visible');
-                btnToggleVendedora.innerHTML = formVendedora.classList.contains('visible') 
-                    ? '<span>✖️</span><span>Cerrar</span>' 
-                    : '<span>➕</span><span>Agregar Vendedora</span>';
-            });
-        } else {
-            console.error('Botón btnToggleFormVendedora no encontrado');
-        }
-        
-        // Toggle formulario producto
-        const btnToggleProducto = document.getElementById('btnToggleFormProducto');
-        const formProducto = document.getElementById('formAgregarProducto');
-        
-        if (btnToggleProducto) {
-            console.log('Botón producto encontrado');
-            btnToggleProducto.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log('Click en botón producto');
-                formProducto.classList.toggle('visible');
-                btnToggleProducto.innerHTML = formProducto.classList.contains('visible') 
-                    ? '<span>✖️</span><span>Cerrar</span>' 
-                    : '<span>➕</span><span>Agregar Producto</span>';
-            });
-        } else {
-            console.error('Botón btnToggleFormProducto no encontrado');
-        }
-    },
-    
-    // ========== BÚSQUEDA Y FILTROS ==========
+    // ========== BÚSQUEDA ==========
     setupSearch() {
         const searchInput = document.getElementById('searchInput');
         const searchBtn = document.getElementById('searchBtn');
@@ -148,7 +122,6 @@ const App = {
         }
     },
     
-    // Filtros de vendedoras
     filterVendedoras(term) {
         const cards = document.querySelectorAll('#vendedorasContainer .vendedora-card');
         cards.forEach(card => {
@@ -181,7 +154,6 @@ const App = {
         });
     },
     
-    // Filtros de productos
     filterProductos(term) {
         const cards = document.querySelectorAll('#productosContainer .producto-card');
         cards.forEach(card => {
@@ -215,16 +187,12 @@ const App = {
         });
     },
     
-    // ========== BOTONES DE GESTIÓN DE DATOS ==========
+    // ========== BOTONES DE GESTIÓN ==========
     setupDataManagementButtons() {
-        document.getElementById('exportDataBtn')?.addEventListener('click', () => alert('Falta implementación'));
-        document.getElementById('importDataLabel')?.addEventListener('click', () => alert('Falta implementación'));
-        document.getElementById('syncAllBtn')?.addEventListener('click', () => alert('Falta implementación'));
-        document.getElementById('clearDataBtn')?.addEventListener('click', () => alert('Falta implementación'));
-        document.getElementById('generarReporteBtn')?.addEventListener('click', () => alert('Falta implementación'));
+        // Ya tienen onclick inline
     },
     
-    // ========== FUNCIONALIDADES ORIGINALES ==========
+    // ========== SERVIDOR ==========
     async testServerConnection() {
         const statusDiv = document.getElementById('serverStatus');
         try {
@@ -244,13 +212,6 @@ const App = {
             statusDiv.className = 'status offline';
             statusDiv.innerHTML = '❌ NO HAY CONEXIÓN CON EL SERVIDOR - Verifica que Render esté activo';
         }
-    },
-    
-    setupEventListeners() {
-        document.getElementById('btnCargarVendedoras')?.addEventListener('click', () => this.cargarVendedoras());
-        document.getElementById('btnCargarProductos')?.addEventListener('click', () => this.cargarProductos());
-        document.getElementById('btnGuardarVendedora')?.addEventListener('click', () => this.guardarVendedora());
-        document.getElementById('btnGuardarProducto')?.addEventListener('click', () => this.guardarProducto());
     },
     
     // ========== VENDEDORAS ==========
@@ -355,11 +316,9 @@ const App = {
                 
                 this.cargarVendedoras();
                 
-                // Cerrar formulario después de guardar
-                const formVendedora = document.getElementById('formAgregarVendedora');
-                const btnToggle = document.getElementById('btnToggleFormVendedora');
-                formVendedora.classList.remove('visible');
-                btnToggle.innerHTML = '<span>➕</span><span>Agregar Vendedora</span>';
+                // Cerrar formulario
+                document.getElementById('formAgregarVendedora').style.display = 'none';
+                document.getElementById('btnToggleFormVendedora').innerHTML = '<span>➕</span><span>Agregar Vendedora</span>';
             } else {
                 resultado.style.background = '#f8d7da';
                 resultado.style.color = '#721c24';
@@ -443,7 +402,6 @@ const App = {
                             <button class="btn btn-sm btn-danger" onclick="App.eliminarProducto('${p.id}')">🗑️ Eliminar</button>
                         </div>
                         
-                        <!-- Formulario de edición (oculto inicialmente) -->
                         <div id="edit-form-${p.id}" class="edit-producto-form">
                             <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
                                 <div style="flex: 1;">
@@ -479,7 +437,11 @@ const App = {
     toggleEditProducto(id) {
         const form = document.getElementById(`edit-form-${id}`);
         if (form) {
-            form.classList.toggle('visible');
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
         }
     },
     
@@ -534,10 +496,8 @@ const App = {
                 this.cargarProductos();
                 
                 // Cerrar formulario
-                const formProducto = document.getElementById('formAgregarProducto');
-                const btnToggle = document.getElementById('btnToggleFormProducto');
-                formProducto.classList.remove('visible');
-                btnToggle.innerHTML = '<span>➕</span><span>Agregar Producto</span>';
+                document.getElementById('formAgregarProducto').style.display = 'none';
+                document.getElementById('btnToggleFormProducto').innerHTML = '<span>➕</span><span>Agregar Producto</span>';
             } else {
                 resultado.style.background = '#f8d7da';
                 resultado.style.color = '#721c24';
