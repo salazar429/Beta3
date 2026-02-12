@@ -1,0 +1,530 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dueño - TEST</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #8e44ad;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        h2 {
+            color: #8e44ad;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #9b59b6;
+            padding-bottom: 10px;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .status.online {
+            background: #d4edda;
+            color: #155724;
+            border-left: 5px solid #2ecc71;
+        }
+        
+        .status.offline {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        input:focus, select:focus {
+            border-color: #9b59b6;
+            outline: none;
+        }
+        
+        button {
+            background: #9b59b6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            background: #8e44ad;
+            transform: translateY(-2px);
+        }
+        
+        button.success {
+            background: #2ecc71;
+        }
+        
+        button.danger {
+            background: #e74c3c;
+        }
+        
+        .vendedora-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid #9b59b6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .vendedora-info {
+            flex: 1;
+        }
+        
+        .vendedora-nombre {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+        
+        .vendedora-usuario {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .vendedora-tienda {
+            background: #e8f4f8;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .badge.activa {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge.inactiva {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .producto-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+        
+        .precio {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2ecc71;
+            margin: 15px 0;
+        }
+        
+        .flex {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .vendedora-item {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Estado del servidor -->
+        <div id="serverStatus" class="status online">
+            🔍 Verificando conexión con servidor...
+        </div>
+        
+        <!-- Panel Principal -->
+        <div class="card">
+            <h1>👑 Sistema Dueño - TEST</h1>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap;">
+                <button id="btnTestServer" class="success">🔄 Probar Servidor</button>
+                <button id="btnCargarVendedoras">👩‍💼 Cargar Vendedoras</button>
+                <button id="btnCargarProducto">📦 Cargar Producto</button>
+            </div>
+            
+            <div class="grid-2">
+                <!-- Columna 1: Gestión de Vendedoras -->
+                <div>
+                    <h2>➕ Agregar Vendedora</h2>
+                    <div class="form-group">
+                        <label>Nombre completo</label>
+                        <input type="text" id="vendedoraNombre" placeholder="Ej: Juan Pérez">
+                    </div>
+                    <div class="form-group">
+                        <label>Usuario</label>
+                        <input type="text" id="vendedoraUsuario" placeholder="Ej: juan_p">
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="text" id="vendedoraPassword" value="123456">
+                    </div>
+                    <div class="form-group">
+                        <label>Tienda</label>
+                        <input type="text" id="vendedoraTienda" placeholder="Ej: Tienda Centro">
+                    </div>
+                    <button id="btnGuardarVendedora" style="width: 100%;">💾 Guardar Vendedora</button>
+                    <div id="vendedoraResultado" style="margin-top: 15px; display: none;"></div>
+                </div>
+                
+                <!-- Columna 2: Gestión de Producto -->
+                <div>
+                    <h2>📦 Producto de Prueba</h2>
+                    <div id="productoContainer">
+                        <div style="text-align: center; padding: 20px;">
+                            <div class="spinner" style="display: inline-block;"></div>
+                            <p style="margin-top: 10px; color: #7f8c8d;">Cargando producto...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Lista de Vendedoras -->
+        <div class="card">
+            <h2>👩‍💼 Vendedoras Registradas</h2>
+            <div id="vendedorasContainer">
+                <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+                    Haz clic en "Cargar Vendedoras" para ver la lista
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #9b59b6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    
+    <script>
+        // ===========================================
+        // APP DUEÑO SIMPLIFICADA - SOLO PRUEBAS
+        // ===========================================
+        
+        // CONFIGURACIÓN - CAMBIA ESTO POR TU URL DE RENDER
+        const API_URL = 'https://sistema-test-api.onrender.com'; // TU URL DE RENDER
+        const App = {
+            productoActual: null,
+            
+            init() {
+                this.setupEventListeners();
+                this.testServerConnection();
+            },
+            
+            async testServerConnection() {
+                const statusDiv = document.getElementById('serverStatus');
+                try {
+                    const response = await fetch(API_URL);
+                    if (response.ok) {
+                        const data = await response.json();
+                        statusDiv.className = 'status online';
+                        statusDiv.innerHTML = `✅ Conectado al servidor - ${data.mensaje} (Vendedoras: ${data.vendedoras}, Productos: ${data.productos})`;
+                        
+                        // Cargar datos automáticamente
+                        this.cargarVendedoras();
+                        this.cargarProducto();
+                    } else {
+                        throw new Error('Error en respuesta');
+                    }
+                } catch (error) {
+                    console.error('Error conectando al servidor:', error);
+                    statusDiv.className = 'status offline';
+                    statusDiv.innerHTML = '❌ NO HAY CONEXIÓN CON EL SERVIDOR - Verifica que Render esté activo';
+                }
+            },
+            
+            setupEventListeners() {
+                document.getElementById('btnTestServer').addEventListener('click', () => this.testServerConnection());
+                document.getElementById('btnCargarVendedoras').addEventListener('click', () => this.cargarVendedoras());
+                document.getElementById('btnCargarProducto').addEventListener('click', () => this.cargarProducto());
+                document.getElementById('btnGuardarVendedora').addEventListener('click', () => this.guardarVendedora());
+            },
+            
+            async cargarVendedoras() {
+                const container = document.getElementById('vendedorasContainer');
+                
+                try {
+                    const response = await fetch(`${API_URL}/api/dueno/vendedoras`);
+                    const vendedoras = await response.json();
+                    
+                    if (vendedoras.length === 0) {
+                        container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7f8c8d;">No hay vendedoras registradas</div>';
+                        return;
+                    }
+                    
+                    let html = '';
+                    vendedoras.forEach(v => {
+                        html += `
+                            <div class="vendedora-item">
+                                <div class="vendedora-info">
+                                    <div class="vendedora-nombre">${v.nombre}</div>
+                                    <div class="vendedora-usuario">@${v.usuario}</div>
+                                    <span class="vendedora-tienda">🏪 ${v.tienda}</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <span class="badge ${v.status}">${v.status}</span>
+                                    <button class="danger" onclick="App.eliminarVendedora('${v.id}')" style="padding: 8px 16px;">🗑️</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    container.innerHTML = html;
+                    
+                } catch (error) {
+                    console.error('Error cargando vendedoras:', error);
+                    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #e74c3c;">❌ Error cargando vendedoras</div>';
+                }
+            },
+            
+            async cargarProducto() {
+                const container = document.getElementById('productoContainer');
+                
+                try {
+                    const response = await fetch(`${API_URL}/api/dueno/productos`);
+                    const productos = await response.json();
+                    
+                    if (productos && productos.length > 0) {
+                        this.productoActual = productos[0];
+                        const p = this.productoActual;
+                        
+                        container.innerHTML = `
+                            <div class="producto-card">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div>
+                                        <div style="font-size: 1.2rem; font-weight: 600; color: #2c3e50;">
+                                            ${p.nombre}
+                                        </div>
+                                        <div style="margin-top: 5px; color: #7f8c8d;">
+                                            ID: ${p.id}
+                                        </div>
+                                    </div>
+                                    <span class="badge ${p.status}">${p.status}</span>
+                                </div>
+                                
+                                <div class="precio">$${p.precio.toFixed(2)}</div>
+                                
+                                <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                                        <div style="flex: 1;">
+                                            <label>Nombre del producto</label>
+                                            <input type="text" id="editNombre" value="${p.nombre}" style="margin-top: 5px;">
+                                        </div>
+                                        <div style="width: 150px;">
+                                            <label>Precio</label>
+                                            <input type="number" id="editPrecio" value="${p.precio}" step="0.01" style="margin-top: 5px;">
+                                        </div>
+                                        <div style="width: 120px;">
+                                            <label>Stock</label>
+                                            <input type="number" id="editStock" value="${p.stock}" style="margin-top: 5px;">
+                                        </div>
+                                        <div>
+                                            <button onclick="App.actualizarProducto()" style="margin-top: 20px;">Actualizar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    console.error('Error cargando producto:', error);
+                    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #e74c3c;">❌ Error cargando producto</div>';
+                }
+            },
+            
+            async guardarVendedora() {
+                const nombre = document.getElementById('vendedoraNombre').value.trim();
+                const usuario = document.getElementById('vendedoraUsuario').value.trim();
+                const password = document.getElementById('vendedoraPassword').value.trim();
+                const tienda = document.getElementById('vendedoraTienda').value.trim() || 'Tienda General';
+                
+                const resultado = document.getElementById('vendedoraResultado');
+                
+                if (!nombre || !usuario || !password) {
+                    resultado.style.display = 'block';
+                    resultado.style.background = '#f8d7da';
+                    resultado.style.color = '#721c24';
+                    resultado.innerHTML = '❌ Nombre, usuario y contraseña son obligatorios';
+                    return;
+                }
+                
+                resultado.style.display = 'block';
+                resultado.style.background = '#fff3cd';
+                resultado.style.color = '#856404';
+                resultado.innerHTML = '⏳ Guardando vendedora...';
+                
+                try {
+                    const response = await fetch(`${API_URL}/api/dueno/vendedoras`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nombre, usuario, password, tienda })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        resultado.style.background = '#d4edda';
+                        resultado.style.color = '#155724';
+                        resultado.innerHTML = `✅ Vendedora creada: ${data.vendedora.nombre} (@${data.vendedora.usuario})`;
+                        
+                        // Limpiar formulario
+                        document.getElementById('vendedoraNombre').value = '';
+                        document.getElementById('vendedoraUsuario').value = '';
+                        document.getElementById('vendedoraPassword').value = '123456';
+                        document.getElementById('vendedoraTienda').value = '';
+                        
+                        // Recargar lista
+                        this.cargarVendedoras();
+                    } else {
+                        resultado.style.background = '#f8d7da';
+                        resultado.style.color = '#721c24';
+                        resultado.innerHTML = `❌ Error: ${data.error || 'No se pudo crear la vendedora'}`;
+                    }
+                } catch (error) {
+                    console.error('Error guardando vendedora:', error);
+                    resultado.style.background = '#f8d7da';
+                    resultado.style.color = '#721c24';
+                    resultado.innerHTML = '❌ Error de conexión con el servidor';
+                }
+            },
+            
+            async actualizarProducto() {
+                const nombre = document.getElementById('editNombre')?.value;
+                const precio = document.getElementById('editPrecio')?.value;
+                const stock = document.getElementById('editStock')?.value;
+                
+                if (!this.productoActual) return;
+                
+                try {
+                    const response = await fetch(`${API_URL}/api/dueno/productos/${this.productoActual.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nombre, precio, stock })
+                    });
+                    
+                    if (response.ok) {
+                        this.cargarProducto();
+                        alert('✅ Producto actualizado correctamente');
+                    }
+                } catch (error) {
+                    console.error('Error actualizando producto:', error);
+                    alert('❌ Error actualizando producto');
+                }
+            },
+            
+            async eliminarVendedora(id) {
+                if (!confirm('¿Eliminar esta vendedora?')) return;
+                
+                try {
+                    const response = await fetch(`${API_URL}/api/dueno/vendedoras/${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        this.cargarVendedoras();
+                    }
+                } catch (error) {
+                    console.error('Error eliminando vendedora:', error);
+                    alert('❌ Error eliminando vendedora');
+                }
+            }
+        };
+        
+        // Iniciar app
+        document.addEventListener('DOMContentLoaded', () => {
+            App.init();
+        });
+    </script>
+</body>
+</html>
+
