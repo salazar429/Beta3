@@ -22,6 +22,26 @@
         .search-container.visible {
             display: block;
         }
+        /* Formulario de agregar oculto por defecto */
+        #formAgregarVendedora,
+        #formAgregarProducto {
+            display: none;
+        }
+        #formAgregarVendedora.visible,
+        #formAgregarProducto.visible {
+            display: block;
+        }
+        /* Campos de edición de producto ocultos por defecto */
+        .edit-producto-form {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .edit-producto-form.visible {
+            display: block;
+        }
         /* Ajustes para móvil */
         @media (max-width: 768px) {
             .grid-2 {
@@ -110,39 +130,48 @@
 
         <!-- ========== SECCIÓN VENDEDORAS ========== -->
         <div id="vendedorasSection" class="page-section">
+            <!-- Botón para agregar vendedora -->
             <div class="card">
                 <div class="section-header">
                     <h2 class="section-title">
-                        👩‍💼 Agregar Vendedora
-                    </h2>
-                </div>
-                
-                <div class="form-group">
-                    <label>Nombre completo</label>
-                    <input type="text" id="vendedoraNombre" class="form-control" placeholder="Ej: Juan Pérez">
-                </div>
-                <div class="form-group">
-                    <label>Usuario</label>
-                    <input type="text" id="vendedoraUsuario" class="form-control" placeholder="Ej: juan_p">
-                </div>
-                <div class="form-group">
-                    <label>Contraseña</label>
-                    <input type="text" id="vendedoraPassword" class="form-control" value="123456">
-                </div>
-                <div class="form-group">
-                    <label>Tienda</label>
-                    <input type="text" id="vendedoraTienda" class="form-control" placeholder="Ej: Tienda Centro">
-                </div>
-                <button id="btnGuardarVendedora" class="btn btn-primary" style="width: 100%;">💾 Guardar Vendedora</button>
-                <div id="vendedoraResultado" style="margin-top: 15px; display: none; padding: 10px; border-radius: var(--border-radius);"></div>
-            </div>
-
-            <div class="card">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        👩‍💼 Vendedoras Registradas
+                        👩‍💼 Gestión de Vendedoras
                         <span id="vendedorasCount">(0 vendedoras)</span>
                     </h2>
+                    <button id="btnToggleFormVendedora" class="btn btn-primary">
+                        <span>➕</span>
+                        <span>Agregar Vendedora</span>
+                    </button>
+                </div>
+                
+                <!-- Formulario de agregar vendedora (oculto inicialmente) -->
+                <div id="formAgregarVendedora">
+                    <div class="card" style="margin-top: 10px; background: #f8f9fa;">
+                        <div class="form-group">
+                            <label>Nombre completo</label>
+                            <input type="text" id="vendedoraNombre" class="form-control" placeholder="Ej: Juan Pérez">
+                        </div>
+                        <div class="form-group">
+                            <label>Usuario</label>
+                            <input type="text" id="vendedoraUsuario" class="form-control" placeholder="Ej: juan_p">
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña</label>
+                            <input type="text" id="vendedoraPassword" class="form-control" value="123456">
+                        </div>
+                        <div class="form-group">
+                            <label>Tienda</label>
+                            <input type="text" id="vendedoraTienda" class="form-control" placeholder="Ej: Tienda Centro">
+                        </div>
+                        <button id="btnGuardarVendedora" class="btn btn-primary" style="width: 100%;">💾 Guardar Vendedora</button>
+                        <div id="vendedoraResultado" style="margin-top: 15px; display: none; padding: 10px; border-radius: var(--border-radius);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de vendedoras -->
+            <div class="card">
+                <div class="section-header">
+                    <h3 class="section-title">Vendedoras Registradas</h3>
                 </div>
                 <div id="vendedorasContainer">
                     <div style="text-align: center; padding: 40px; color: #7f8c8d;">
@@ -157,20 +186,68 @@
 
         <!-- ========== SECCIÓN PRODUCTOS ========== -->
         <div id="productosSection" class="page-section">
+            <!-- Botón para agregar producto -->
             <div class="card">
                 <div class="section-header">
                     <h2 class="section-title">
-                        📦 Producto de Prueba
+                        📦 Gestión de Productos
+                        <span id="productosCount">(0 productos)</span>
                     </h2>
+                    <button id="btnToggleFormProducto" class="btn btn-primary">
+                        <span>➕</span>
+                        <span>Agregar Producto</span>
+                    </button>
                 </div>
-                <div id="productoContainer">
+                
+                <!-- Formulario de agregar producto (oculto inicialmente) -->
+                <div id="formAgregarProducto">
+                    <div class="card" style="margin-top: 10px; background: #f8f9fa;">
+                        <div class="form-group">
+                            <label>Nombre del producto</label>
+                            <input type="text" id="productoNombre" class="form-control" placeholder="Ej: Camisa">
+                        </div>
+                        <div class="form-group">
+                            <label>Categoría</label>
+                            <select id="productoCategoria" class="form-control">
+                                <option value="ropa">Ropa</option>
+                                <option value="calzado">Calzado</option>
+                                <option value="accesorios">Accesorios</option>
+                                <option value="electrónica">Electrónica</option>
+                                <option value="hogar">Hogar</option>
+                                <option value="otros">Otros</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Precio ($)</label>
+                            <input type="number" id="productoPrecio" class="form-control" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Stock</label>
+                            <input type="number" id="productoStock" class="form-control" min="0" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Stock mínimo</label>
+                            <input type="number" id="productoMinStock" class="form-control" min="0" placeholder="5">
+                        </div>
+                        <button id="btnGuardarProducto" class="btn btn-primary" style="width: 100%;">💾 Guardar Producto</button>
+                        <div id="productoResultado" style="margin-top: 15px; display: none; padding: 10px; border-radius: var(--border-radius);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de productos -->
+            <div class="card">
+                <div class="section-header">
+                    <h3 class="section-title">Productos Disponibles</h3>
+                </div>
+                <div id="productosContainer">
                     <div style="text-align: center; padding: 20px;">
                         <div class="spinner" style="display: inline-block;"></div>
-                        <p style="margin-top: 10px; color: #7f8c8d;">Cargando producto...</p>
+                        <p style="margin-top: 10px; color: #7f8c8d;">Cargando productos...</p>
                     </div>
                 </div>
                 <div style="margin-top: 20px; text-align: center;">
-                    <button id="btnCargarProducto" class="btn btn-primary">🔄 Cargar Producto</button>
+                    <button id="btnCargarProductos" class="btn btn-primary">🔄 Cargar Productos</button>
                 </div>
             </div>
         </div>
@@ -217,7 +294,6 @@
     <div id="notification" class="notification" style="display: none;"></div>
 
     <!-- Script externo -->
-    <script src="/app_dueño.js"></script>
+    <script src="app_dueño.js"></script>
 </body>
 </html>
-
