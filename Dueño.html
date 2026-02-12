@@ -8,50 +8,18 @@
     <!-- Estilos profesionales -->
     <link rel="stylesheet" href="styles_dueño (1).css">
     <style>
-        /* Ocultar secciones por defecto */
-        .page-section {
-            display: none;
-        }
-        .page-section.active {
-            display: block;
-        }
-        /* Buscador oculto por defecto */
-        .search-container {
-            display: none;
-        }
-        .search-container.visible {
-            display: block;
-        }
-        /* Formulario de agregar oculto por defecto */
-        #formAgregarVendedora,
-        #formAgregarProducto {
-            display: none;
-        }
-        #formAgregarVendedora.visible,
-        #formAgregarProducto.visible {
-            display: block;
-        }
-        /* Campos de edición de producto ocultos por defecto */
-        .edit-producto-form {
-            display: none;
-            margin-top: 15px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        .edit-producto-form.visible {
-            display: block;
-        }
-        /* Ajustes para móvil */
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+        .search-container { display: none; }
+        .search-container.visible { display: block; }
+        #formAgregarVendedora, #formAgregarProducto { display: none; }
+        .edit-producto-form { display: none; }
+        .edit-producto-form.visible { display: block; }
         @media (max-width: 768px) {
-            .grid-2 {
-                grid-template-columns: 1fr !important;
-            }
+            .grid-2 { grid-template-columns: 1fr !important; }
         }
-        /* Spinner */
         .spinner {
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             border: 4px solid #f3f3f3;
             border-top: 4px solid #9b59b6;
             border-radius: 50%;
@@ -64,7 +32,6 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header>
         <div class="header-container">
             <div class="logo">
@@ -78,7 +45,7 @@
         </div>
     </header>
 
-    <!-- Barra de búsqueda (solo visible en vendedoras y productos) -->
+    <!-- Barra de búsqueda -->
     <div class="search-container" id="searchContainer">
         <div class="search-box">
             <input type="text" id="searchInput" class="search-input" placeholder="Buscar...">
@@ -87,38 +54,21 @@
         <div class="filter-tabs" id="filterTabs"></div>
     </div>
 
-    <!-- Contenido principal -->
     <main>
-        <!-- ========== SECCIÓN DASHBOARD ========== -->
+        <!-- ========== DASHBOARD ========== -->
         <div id="dashboardSection" class="page-section active">
-            <!-- Estado del servidor -->
             <div class="card" style="margin-bottom: 20px;">
                 <div id="serverStatus" class="status online">
                     🔍 Verificando conexión con servidor...
                 </div>
             </div>
-
-            <!-- Gestión de Datos -->
             <div class="card data-management">
                 <h3 class="section-title">Gestión de Datos</h3>
                 <div class="data-actions">
-                    <button class="btn btn-primary" id="exportDataBtn">
-                        <span>📥</span>
-                        <span>Exportar Datos</span>
-                    </button>
-                    <label class="btn btn-secondary" id="importDataLabel">
-                        <span>📤</span>
-                        <span>Importar Datos</span>
-                        <input type="file" id="importDataInput" accept=".json" style="display: none;">
-                    </label>
-                    <button class="btn btn-warning" id="syncAllBtn">
-                        <span>🔄</span>
-                        <span>Sincronizar Productos</span>
-                    </button>
-                    <button class="btn btn-danger" id="clearDataBtn">
-                        <span>🗑️</span>
-                        <span>Limpiar Datos</span>
-                    </button>
+                    <button class="btn btn-primary" onclick="alert('Falta implementación')">📥 Exportar Datos</button>
+                    <label class="btn btn-secondary" onclick="alert('Falta implementación')">📤 Importar Datos</label>
+                    <button class="btn btn-warning" onclick="alert('Falta implementación')">🔄 Sincronizar Productos</button>
+                    <button class="btn btn-danger" onclick="alert('Falta implementación')">🗑️ Limpiar Datos</button>
                 </div>
                 <div class="data-info">
                     <p>📊 <strong>Persistencia de datos activa</strong> - Los datos se guardan automáticamente</p>
@@ -128,23 +78,22 @@
             </div>
         </div>
 
-        <!-- ========== SECCIÓN VENDEDORAS ========== -->
+        <!-- ========== VENDEDORAS ========== -->
         <div id="vendedorasSection" class="page-section">
-            <!-- Botón para agregar vendedora -->
             <div class="card">
                 <div class="section-header">
                     <h2 class="section-title">
                         👩‍💼 Gestión de Vendedoras
                         <span id="vendedorasCount">(0 vendedoras)</span>
                     </h2>
-                    <button id="btnToggleFormVendedora" class="btn btn-primary">
+                    <button id="btnToggleFormVendedora" class="btn btn-primary" onclick="toggleFormVendedora()">
                         <span>➕</span>
                         <span>Agregar Vendedora</span>
                     </button>
                 </div>
                 
-                <!-- Formulario de agregar vendedora (oculto inicialmente) -->
-                <div id="formAgregarVendedora">
+                <!-- Formulario de agregar vendedora -->
+                <div id="formAgregarVendedora" style="display: none;">
                     <div class="card" style="margin-top: 10px; background: #f8f9fa;">
                         <div class="form-group">
                             <label>Nombre completo</label>
@@ -162,13 +111,12 @@
                             <label>Tienda</label>
                             <input type="text" id="vendedoraTienda" class="form-control" placeholder="Ej: Tienda Centro">
                         </div>
-                        <button id="btnGuardarVendedora" class="btn btn-primary" style="width: 100%;">💾 Guardar Vendedora</button>
+                        <button id="btnGuardarVendedora" class="btn btn-primary" style="width: 100%;" onclick="App.guardarVendedora()">💾 Guardar Vendedora</button>
                         <div id="vendedoraResultado" style="margin-top: 15px; display: none; padding: 10px; border-radius: var(--border-radius);"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Lista de vendedoras -->
             <div class="card">
                 <div class="section-header">
                     <h3 class="section-title">Vendedoras Registradas</h3>
@@ -179,28 +127,27 @@
                     </div>
                 </div>
                 <div style="margin-top: 20px; text-align: center;">
-                    <button id="btnCargarVendedoras" class="btn btn-primary">🔄 Cargar Vendedoras</button>
+                    <button id="btnCargarVendedoras" class="btn btn-primary" onclick="App.cargarVendedoras()">🔄 Cargar Vendedoras</button>
                 </div>
             </div>
         </div>
 
-        <!-- ========== SECCIÓN PRODUCTOS ========== -->
+        <!-- ========== PRODUCTOS ========== -->
         <div id="productosSection" class="page-section">
-            <!-- Botón para agregar producto -->
             <div class="card">
                 <div class="section-header">
                     <h2 class="section-title">
                         📦 Gestión de Productos
                         <span id="productosCount">(0 productos)</span>
                     </h2>
-                    <button id="btnToggleFormProducto" class="btn btn-primary">
+                    <button id="btnToggleFormProducto" class="btn btn-primary" onclick="toggleFormProducto()">
                         <span>➕</span>
                         <span>Agregar Producto</span>
                     </button>
                 </div>
                 
-                <!-- Formulario de agregar producto (oculto inicialmente) -->
-                <div id="formAgregarProducto">
+                <!-- Formulario de agregar producto -->
+                <div id="formAgregarProducto" style="display: none;">
                     <div class="card" style="margin-top: 10px; background: #f8f9fa;">
                         <div class="form-group">
                             <label>Nombre del producto</label>
@@ -229,13 +176,12 @@
                             <label>Stock mínimo</label>
                             <input type="number" id="productoMinStock" class="form-control" min="0" placeholder="5" value="5">
                         </div>
-                        <button id="btnGuardarProducto" class="btn btn-primary" style="width: 100%;">💾 Guardar Producto</button>
+                        <button id="btnGuardarProducto" class="btn btn-primary" style="width: 100%;" onclick="App.guardarProducto()">💾 Guardar Producto</button>
                         <div id="productoResultado" style="margin-top: 15px; display: none; padding: 10px; border-radius: var(--border-radius);"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Lista de productos -->
             <div class="card">
                 <div class="section-header">
                     <h3 class="section-title">Productos Disponibles</h3>
@@ -247,24 +193,22 @@
                     </div>
                 </div>
                 <div style="margin-top: 20px; text-align: center;">
-                    <button id="btnCargarProductos" class="btn btn-primary">🔄 Cargar Productos</button>
+                    <button id="btnCargarProductos" class="btn btn-primary" onclick="App.cargarProductos()">🔄 Cargar Productos</button>
                 </div>
             </div>
         </div>
 
-        <!-- ========== SECCIÓN REPORTES ========== -->
+        <!-- ========== REPORTES ========== -->
         <div id="reportesSection" class="page-section">
             <div class="card">
                 <div class="section-header">
-                    <h2 class="section-title">
-                        📋 Reportes
-                    </h2>
+                    <h2 class="section-title">📋 Reportes</h2>
                 </div>
                 <div style="text-align: center; padding: 60px 20px; color: #7f8c8d;">
                     <span style="font-size: 3rem; display: block; margin-bottom: 20px;">📊</span>
                     <h3 style="margin-bottom: 15px; color: #34495e;">Módulo de Reportes</h3>
                     <p style="margin-bottom: 20px;">Esta funcionalidad estará disponible próximamente.</p>
-                    <button class="btn btn-primary" id="generarReporteBtn">Generar Reporte</button>
+                    <button class="btn btn-primary" onclick="alert('Falta implementación')">Generar Reporte</button>
                 </div>
             </div>
         </div>
@@ -272,28 +216,26 @@
 
     <!-- Menú inferior -->
     <nav class="bottom-nav">
-        <a href="#" class="nav-item active" data-page="dashboard">
+        <a href="#" class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard'); return false;">
             <span class="nav-icon">📊</span>
             <span class="nav-label">Dashboard</span>
         </a>
-        <a href="#" class="nav-item" data-page="vendedoras">
+        <a href="#" class="nav-item" data-page="vendedoras" onclick="switchPage('vendedoras'); return false;">
             <span class="nav-icon">👩‍💼</span>
             <span class="nav-label">Vendedoras</span>
         </a>
-        <a href="#" class="nav-item" data-page="productos">
+        <a href="#" class="nav-item" data-page="productos" onclick="switchPage('productos'); return false;">
             <span class="nav-icon">📦</span>
             <span class="nav-label">Productos</span>
         </a>
-        <a href="#" class="nav-item" data-page="reportes">
+        <a href="#" class="nav-item" data-page="reportes" onclick="switchPage('reportes'); return false;">
             <span class="nav-icon">📋</span>
             <span class="nav-label">Reportes</span>
         </a>
     </nav>
 
-    <!-- Notificación -->
     <div id="notification" class="notification" style="display: none;"></div>
 
-    <!-- Script externo -->
     <script src="app_dueño.js"></script>
 </body>
 </html>
