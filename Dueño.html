@@ -5,8 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dueño - TEST</title>
     
-    <!-- Estilos profesionales como en index(2) -->
+    <!-- Estilos profesionales -->
     <link rel="stylesheet" href="styles_dueño (1).css">
+    <style>
+        /* Ocultar secciones por defecto */
+        .page-section {
+            display: none;
+        }
+        .page-section.active {
+            display: block;
+        }
+        /* Buscador oculto por defecto */
+        .search-container {
+            display: none;
+        }
+        .search-container.visible {
+            display: block;
+        }
+        /* Ajustes para móvil */
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        /* Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #9b59b6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -23,166 +58,165 @@
         </div>
     </header>
 
-    <!-- Barra de búsqueda y filtros (estilo, sin funcionalidad real por ahora) -->
-    <div class="search-container">
+    <!-- Barra de búsqueda (solo visible en vendedoras y productos) -->
+    <div class="search-container" id="searchContainer">
         <div class="search-box">
             <input type="text" id="searchInput" class="search-input" placeholder="Buscar...">
-            <button id="searchBtn" class="search-btn" onclick="alert('Falta implementación')">🔍</button>
+            <button id="searchBtn" class="search-btn">🔍</button>
         </div>
         <div class="filter-tabs" id="filterTabs">
-            <button class="filter-btn active">Todos</button>
-            <button class="filter-btn" onclick="alert('Falta implementación')">Activas</button>
-            <button class="filter-btn" onclick="alert('Falta implementación')">Inactivas</button>
+            <!-- Los filtros se cargarán dinámicamente según la sección -->
         </div>
     </div>
 
     <!-- Contenido principal -->
     <main>
-        <!-- Estado del servidor (estilo card) -->
-        <div class="card" style="margin-bottom: 20px;">
-            <div id="serverStatus" class="status online">
-                🔍 Verificando conexión con servidor...
+        <!-- ========== SECCIÓN DASHBOARD ========== -->
+        <div id="dashboardSection" class="page-section active">
+            <!-- Estado del servidor -->
+            <div class="card" style="margin-bottom: 20px;">
+                <div id="serverStatus" class="status online">
+                    🔍 Verificando conexión con servidor...
+                </div>
+            </div>
+
+            <!-- Gestión de Datos -->
+            <div class="card data-management">
+                <h3 class="section-title">Gestión de Datos</h3>
+                <div class="data-actions">
+                    <button class="btn btn-primary" onclick="alert('Falta implementación')">
+                        <span>📥</span>
+                        <span>Exportar Datos</span>
+                    </button>
+                    <label class="btn btn-secondary" onclick="alert('Falta implementación')">
+                        <span>📤</span>
+                        <span>Importar Datos</span>
+                        <input type="file" accept=".json" style="display: none;">
+                    </label>
+                    <button class="btn btn-warning" onclick="alert('Falta implementación')">
+                        <span>🔄</span>
+                        <span>Sincronizar Productos</span>
+                    </button>
+                    <button class="btn btn-danger" onclick="alert('Falta implementación')">
+                        <span>🗑️</span>
+                        <span>Limpiar Datos</span>
+                    </button>
+                </div>
+                <div class="data-info">
+                    <p>📊 <strong>Persistencia de datos activa</strong> - Los datos se guardan automáticamente</p>
+                    <p>💾 <strong>Backup automático</strong> - Se crean copias de seguridad cada 5 minutos</p>
+                    <p>🔒 <strong>Datos locales</strong> - Toda la información se almacena en este dispositivo</p>
+                </div>
             </div>
         </div>
 
-        <!-- Panel Principal -->
-        <div class="card">
-            <div style="display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap;">
-                <button id="btnTestServer" class="btn btn-success">🔄 Probar Servidor</button>
-                <button id="btnCargarVendedoras" class="btn btn-primary">👩‍💼 Cargar Vendedoras</button>
-                <button id="btnCargarProducto" class="btn btn-primary">📦 Cargar Producto</button>
-            </div>
-            
-            <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <!-- Columna 1: Gestión de Vendedoras -->
-                <div>
-                    <h2 class="section-title">➕ Agregar Vendedora</h2>
-                    <div class="form-group">
-                        <label>Nombre completo</label>
-                        <input type="text" id="vendedoraNombre" class="form-control" placeholder="Ej: Juan Pérez">
-                    </div>
-                    <div class="form-group">
-                        <label>Usuario</label>
-                        <input type="text" id="vendedoraUsuario" class="form-control" placeholder="Ej: juan_p">
-                    </div>
-                    <div class="form-group">
-                        <label>Contraseña</label>
-                        <input type="text" id="vendedoraPassword" class="form-control" value="123456">
-                    </div>
-                    <div class="form-group">
-                        <label>Tienda</label>
-                        <input type="text" id="vendedoraTienda" class="form-control" placeholder="Ej: Tienda Centro">
-                    </div>
-                    <button id="btnGuardarVendedora" class="btn btn-primary" style="width: 100%;">💾 Guardar Vendedora</button>
-                    <div id="vendedoraResultado" style="margin-top: 15px; display: none; padding: 10px; border-radius: var(--border-radius);"></div>
+        <!-- ========== SECCIÓN VENDEDORAS ========== -->
+        <div id="vendedorasSection" class="page-section">
+            <div class="card">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        👩‍💼 Agregar Vendedora
+                    </h2>
                 </div>
                 
-                <!-- Columna 2: Gestión de Producto -->
-                <div>
-                    <h2 class="section-title">📦 Producto de Prueba</h2>
-                    <div id="productoContainer">
-                        <div style="text-align: center; padding: 20px;">
-                            <div class="spinner" style="display: inline-block;"></div>
-                            <p style="margin-top: 10px; color: #7f8c8d;">Cargando producto...</p>
-                        </div>
+                <div class="form-group">
+                    <label>Nombre completo</label>
+                    <input type="text" id="vendedoraNombre" class="form-control" placeholder="Ej: Juan Pérez">
+                </div>
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" id="vendedoraUsuario" class="form-control" placeholder="Ej: juan_p">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="text" id="vendedoraPassword" class="form-control" value="123456">
+                </div>
+                <div class="form-group">
+                    <label>Tienda</label>
+                    <input type="text" id="vendedoraTienda" class="form-control" placeholder="Ej: Tienda Centro">
+                </div>
+                <button id="btnGuardarVendedora" class="btn btn-primary" style="width: 100%;">💾 Guardar Vendedora</button>
+                <div id="vendedoraResultado" style="margin-top: 15px; display: none; padding: 10px; border-radius: var(--border-radius);"></div>
+            </div>
+
+            <div class="card">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        👩‍💼 Vendedoras Registradas
+                        <span id="vendedorasCount">(0 vendedoras)</span>
+                    </h2>
+                </div>
+                <div id="vendedorasContainer">
+                    <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+                        Haz clic en "Cargar Vendedoras" para ver la lista
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Lista de Vendedoras -->
-        <div class="card">
-            <div class="section-header">
-                <h2 class="section-title">
-                    👩‍💼 Vendedoras Registradas
-                    <span id="vendedorasCount">(0 vendedoras)</span>
-                </h2>
-                <button class="btn btn-primary" onclick="alert('Falta implementación')">
-                    <span>➕</span>
-                    <span>Nueva Vendedora</span>
-                </button>
-            </div>
-            <div id="vendedorasContainer">
-                <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-                    Haz clic en "Cargar Vendedoras" para ver la lista
+                <div style="margin-top: 20px; text-align: center;">
+                    <button id="btnCargarVendedoras" class="btn btn-primary">🔄 Cargar Vendedoras</button>
                 </div>
             </div>
         </div>
 
-        <!-- Gestión de Datos (nuevo, con alertas de falta implementación) -->
-        <div class="card data-management">
-            <h3 class="section-title">Gestión de Datos</h3>
-            <div class="data-actions">
-                <button class="btn btn-primary" id="exportDataBtn" onclick="alert('Falta implementación')">
-                    <span>📥</span>
-                    <span>Exportar Datos</span>
-                </button>
-                <label class="btn btn-secondary" for="importDataInput" onclick="alert('Falta implementación')">
-                    <span>📤</span>
-                    <span>Importar Datos</span>
-                    <input type="file" id="importDataInput" accept=".json" style="display: none;">
-                </label>
-                <button class="btn btn-warning" id="syncAllBtn" onclick="alert('Falta implementación')">
-                    <span>🔄</span>
-                    <span>Sincronizar Productos</span>
-                </button>
-                <button class="btn btn-danger" id="clearDataBtn" onclick="alert('Falta implementación')">
-                    <span>🗑️</span>
-                    <span>Limpiar Datos</span>
-                </button>
+        <!-- ========== SECCIÓN PRODUCTOS ========== -->
+        <div id="productosSection" class="page-section">
+            <div class="card">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        📦 Producto de Prueba
+                    </h2>
+                </div>
+                <div id="productoContainer">
+                    <div style="text-align: center; padding: 20px;">
+                        <div class="spinner" style="display: inline-block;"></div>
+                        <p style="margin-top: 10px; color: #7f8c8d;">Cargando producto...</p>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button id="btnCargarProducto" class="btn btn-primary">🔄 Cargar Producto</button>
+                </div>
             </div>
-            <div class="data-info">
-                <p>📊 <strong>Persistencia de datos activa</strong> - Los datos se guardan automáticamente</p>
-                <p>💾 <strong>Backup automático</strong> - Se crean copias de seguridad cada 5 minutos</p>
-                <p>🔒 <strong>Datos locales</strong> - Toda la información se almacena en este dispositivo</p>
+        </div>
+
+        <!-- ========== SECCIÓN REPORTES ========== -->
+        <div id="reportesSection" class="page-section">
+            <div class="card">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        📋 Reportes
+                    </h2>
+                </div>
+                <div style="text-align: center; padding: 60px 20px; color: #7f8c8d;">
+                    <span style="font-size: 3rem; display: block; margin-bottom: 20px;">📊</span>
+                    <h3 style="margin-bottom: 15px; color: #34495e;">Módulo de Reportes</h3>
+                    <p style="margin-bottom: 20px;">Esta funcionalidad estará disponible próximamente.</p>
+                    <button class="btn btn-primary" onclick="alert('Falta implementación')">Generar Reporte</button>
+                </div>
             </div>
         </div>
     </main>
 
-    <!-- Menú inferior (solo visual, sin funcionalidad real) -->
+    <!-- Menú inferior FUNCIONAL -->
     <nav class="bottom-nav">
-        <a href="#" class="nav-item active" onclick="alert('Falta implementación'); return false;">
+        <a href="#" class="nav-item active" data-page="dashboard">
             <span class="nav-icon">📊</span>
             <span class="nav-label">Dashboard</span>
         </a>
-        <a href="#" class="nav-item" onclick="alert('Falta implementación'); return false;">
+        <a href="#" class="nav-item" data-page="vendedoras">
             <span class="nav-icon">👩‍💼</span>
             <span class="nav-label">Vendedoras</span>
         </a>
-        <a href="#" class="nav-item" onclick="alert('Falta implementación'); return false;">
+        <a href="#" class="nav-item" data-page="productos">
             <span class="nav-icon">📦</span>
             <span class="nav-label">Productos</span>
         </a>
-        <a href="#" class="nav-item" onclick="alert('Falta implementación'); return false;">
+        <a href="#" class="nav-item" data-page="reportes">
             <span class="nav-icon">📋</span>
             <span class="nav-label">Reportes</span>
         </a>
     </nav>
 
-    <!-- Notificación (estilo) -->
+    <!-- Notificación -->
     <div id="notification" class="notification" style="display: none;"></div>
-
-    <style>
-        /* Spinner personalizado para mantener funcionalidad */
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #9b59b6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        /* Ajustes responsivos para grid */
-        @media (max-width: 768px) {
-            .grid-2 {
-                grid-template-columns: 1fr !important;
-            }
-        }
-    </style>
 
     <script>
         // ===========================================
@@ -194,12 +228,128 @@
         
         const App = {
             productoActual: null,
+            currentPage: 'dashboard',
             
             init() {
                 this.setupEventListeners();
                 this.testServerConnection();
+                this.setupNavigation();
+                this.setupSearch();
             },
             
+            // ========== NAVEGACIÓN ==========
+            setupNavigation() {
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const page = item.dataset.page;
+                        this.switchPage(page);
+                    });
+                });
+            },
+            
+            switchPage(page) {
+                // Actualizar clase active en menú
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.dataset.page === page) {
+                        item.classList.add('active');
+                    }
+                });
+                
+                // Mostrar sección correspondiente
+                document.querySelectorAll('.page-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(`${page}Section`).classList.add('active');
+                
+                // Controlar visibilidad del buscador
+                const searchContainer = document.getElementById('searchContainer');
+                if (page === 'vendedoras' || page === 'productos') {
+                    searchContainer.classList.add('visible');
+                    // Actualizar filtros según la sección
+                    this.updateFilterTabs(page);
+                    // Limpiar búsqueda
+                    document.getElementById('searchInput').value = '';
+                } else {
+                    searchContainer.classList.remove('visible');
+                }
+                
+                this.currentPage = page;
+            },
+            
+            // ========== BÚSQUEDA ==========
+            setupSearch() {
+                const searchInput = document.getElementById('searchInput');
+                const searchBtn = document.getElementById('searchBtn');
+                
+                const performSearch = () => {
+                    const term = searchInput.value.toLowerCase();
+                    if (this.currentPage === 'vendedoras') {
+                        this.filterVendedoras(term);
+                    } else if (this.currentPage === 'productos') {
+                        this.filterProductos(term);
+                    }
+                };
+                
+                searchInput.addEventListener('input', performSearch);
+                searchBtn.addEventListener('click', performSearch);
+            },
+            
+            updateFilterTabs(page) {
+                const filterTabs = document.getElementById('filterTabs');
+                if (page === 'vendedoras') {
+                    filterTabs.innerHTML = `
+                        <button class="filter-btn active" data-filter="todos">Todos</button>
+                        <button class="filter-btn" data-filter="activa">Activas</button>
+                        <button class="filter-btn" data-filter="inactiva">Inactivas</button>
+                    `;
+                    // Agregar eventos a filtros
+                    filterTabs.querySelectorAll('.filter-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            filterTabs.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            this.filterVendedorasByStatus(btn.dataset.filter);
+                        });
+                    });
+                } else if (page === 'productos') {
+                    filterTabs.innerHTML = `
+                        <button class="filter-btn active" data-filter="todos">Todos</button>
+                        <button class="filter-btn" data-filter="disponible">Disponibles</button>
+                        <button class="filter-btn" data-filter="bajo-stock">Bajo Stock</button>
+                    `;
+                    filterTabs.querySelectorAll('.filter-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            filterTabs.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            this.filterProductosByStatus(btn.dataset.filter);
+                        });
+                    });
+                }
+            },
+            
+            // Filtros de vendedoras
+            filterVendedoras(term) {
+                // Esta función se implementará cuando tengamos las vendedoras cargadas
+                // Por ahora solo es un placeholder
+                console.log('Buscando vendedoras:', term);
+            },
+            
+            filterVendedorasByStatus(status) {
+                console.log('Filtrando vendedoras por:', status);
+            },
+            
+            // Filtros de productos
+            filterProductos(term) {
+                console.log('Buscando productos:', term);
+            },
+            
+            filterProductosByStatus(status) {
+                console.log('Filtrando productos por:', status);
+            },
+            
+            // ========== FUNCIONALIDADES ORIGINALES ==========
             async testServerConnection() {
                 const statusDiv = document.getElementById('serverStatus');
                 try {
@@ -223,10 +373,10 @@
             },
             
             setupEventListeners() {
-                document.getElementById('btnTestServer').addEventListener('click', () => this.testServerConnection());
-                document.getElementById('btnCargarVendedoras').addEventListener('click', () => this.cargarVendedoras());
-                document.getElementById('btnCargarProducto').addEventListener('click', () => this.cargarProducto());
-                document.getElementById('btnGuardarVendedora').addEventListener('click', () => this.guardarVendedora());
+                document.getElementById('btnTestServer')?.addEventListener('click', () => this.testServerConnection());
+                document.getElementById('btnCargarVendedoras')?.addEventListener('click', () => this.cargarVendedoras());
+                document.getElementById('btnCargarProducto')?.addEventListener('click', () => this.cargarProducto());
+                document.getElementById('btnGuardarVendedora')?.addEventListener('click', () => this.guardarVendedora());
             },
             
             async cargarVendedoras() {
