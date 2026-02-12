@@ -1,5 +1,5 @@
 // ===========================================
-// APP DUEÑO - FUNCIONALIDAD COMPLETA
+// APP DUEÑO - FUNCIONALIDAD COMPLETA CORREGIDA
 // ===========================================
 
 // CONFIGURACIÓN - CAMBIA ESTO POR TU URL DE RENDER
@@ -10,6 +10,7 @@ const App = {
     currentPage: 'dashboard',
     
     init() {
+        console.log('App iniciada');
         this.setupEventListeners();
         this.testServerConnection();
         this.setupNavigation();
@@ -57,28 +58,42 @@ const App = {
     
     // ========== TOGGLE FORMULARIOS ==========
     setupToggleForms() {
+        console.log('Configurando toggle forms');
+        
         // Toggle formulario vendedora
         const btnToggleVendedora = document.getElementById('btnToggleFormVendedora');
         const formVendedora = document.getElementById('formAgregarVendedora');
+        
         if (btnToggleVendedora) {
-            btnToggleVendedora.addEventListener('click', () => {
+            console.log('Botón vendedora encontrado');
+            btnToggleVendedora.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Click en botón vendedora');
                 formVendedora.classList.toggle('visible');
                 btnToggleVendedora.innerHTML = formVendedora.classList.contains('visible') 
                     ? '<span>✖️</span><span>Cerrar</span>' 
                     : '<span>➕</span><span>Agregar Vendedora</span>';
             });
+        } else {
+            console.error('Botón btnToggleFormVendedora no encontrado');
         }
         
         // Toggle formulario producto
         const btnToggleProducto = document.getElementById('btnToggleFormProducto');
         const formProducto = document.getElementById('formAgregarProducto');
+        
         if (btnToggleProducto) {
-            btnToggleProducto.addEventListener('click', () => {
+            console.log('Botón producto encontrado');
+            btnToggleProducto.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Click en botón producto');
                 formProducto.classList.toggle('visible');
                 btnToggleProducto.innerHTML = formProducto.classList.contains('visible') 
                     ? '<span>✖️</span><span>Cerrar</span>' 
                     : '<span>➕</span><span>Agregar Producto</span>';
             });
+        } else {
+            console.error('Botón btnToggleFormProducto no encontrado');
         }
     },
     
@@ -96,8 +111,8 @@ const App = {
             }
         };
         
-        searchInput.addEventListener('input', performSearch);
-        searchBtn.addEventListener('click', performSearch);
+        if (searchInput) searchInput.addEventListener('input', performSearch);
+        if (searchBtn) searchBtn.addEventListener('click', performSearch);
     },
     
     updateFilterTabs(page) {
@@ -192,9 +207,7 @@ const App = {
             
             if (status === 'disponible' && stock > 5) {
                 card.style.display = 'block';
-            } else if (status === 'bajo-stock' && stock <= 5 && stock > 0) {
-                card.style.display = 'block';
-            } else if (status === 'bajo-stock' && stock === 0) {
+            } else if (status === 'bajo-stock' && stock <= 5) {
                 card.style.display = 'block';
             } else {
                 card.style.display = 'none';
@@ -234,7 +247,6 @@ const App = {
     },
     
     setupEventListeners() {
-        document.getElementById('btnTestServer')?.addEventListener('click', () => this.testServerConnection());
         document.getElementById('btnCargarVendedoras')?.addEventListener('click', () => this.cargarVendedoras());
         document.getElementById('btnCargarProductos')?.addEventListener('click', () => this.cargarProductos());
         document.getElementById('btnGuardarVendedora')?.addEventListener('click', () => this.guardarVendedora());
@@ -344,8 +356,10 @@ const App = {
                 this.cargarVendedoras();
                 
                 // Cerrar formulario después de guardar
-                document.getElementById('formAgregarVendedora').classList.remove('visible');
-                document.getElementById('btnToggleFormVendedora').innerHTML = '<span>➕</span><span>Agregar Vendedora</span>';
+                const formVendedora = document.getElementById('formAgregarVendedora');
+                const btnToggle = document.getElementById('btnToggleFormVendedora');
+                formVendedora.classList.remove('visible');
+                btnToggle.innerHTML = '<span>➕</span><span>Agregar Vendedora</span>';
             } else {
                 resultado.style.background = '#f8d7da';
                 resultado.style.color = '#721c24';
@@ -396,13 +410,14 @@ const App = {
             productos.forEach(p => {
                 const stockClass = p.stock < 5 ? 'stock-danger' : '';
                 const statusClass = p.stock < 5 ? 'status-warning' : 'status-active';
+                const statusText = p.stock === 0 ? 'SIN STOCK' : p.stock < 5 ? 'BAJO STOCK' : 'DISPONIBLE';
                 
                 html += `
                     <div class="producto-card" data-producto-id="${p.id}">
                         <div class="producto-header">
                             <div class="producto-name">${p.nombre}</div>
                             <span class="producto-status ${statusClass}">
-                                ${p.stock === 0 ? 'SIN STOCK' : p.stock < 5 ? 'BAJO STOCK' : 'DISPONIBLE'}
+                                ${statusText}
                             </span>
                         </div>
                         <div class="producto-details">
@@ -433,19 +448,19 @@ const App = {
                             <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
                                 <div style="flex: 1;">
                                     <label>Nombre</label>
-                                    <input type="text" id="editNombre-${p.id}" value="${p.nombre}" class="form-control" style="margin-top: 5px;">
+                                    <input type="text" id="editNombre-${p.id}" value="${p.nombre}" class="form-control">
                                 </div>
                                 <div style="width: 150px;">
                                     <label>Precio</label>
-                                    <input type="number" id="editPrecio-${p.id}" value="${p.precio}" step="0.01" class="form-control" style="margin-top: 5px;">
+                                    <input type="number" id="editPrecio-${p.id}" value="${p.precio}" step="0.01" class="form-control">
                                 </div>
                                 <div style="width: 120px;">
                                     <label>Stock</label>
-                                    <input type="number" id="editStock-${p.id}" value="${p.stock}" class="form-control" style="margin-top: 5px;">
+                                    <input type="number" id="editStock-${p.id}" value="${p.stock}" class="form-control">
                                 </div>
                                 <div>
-                                    <button onclick="App.actualizarProducto('${p.id}')" class="btn btn-success" style="margin-top: 20px;">Guardar</button>
-                                    <button onclick="App.toggleEditProducto('${p.id}')" class="btn btn-secondary" style="margin-top: 20px;">Cancelar</button>
+                                    <button onclick="App.actualizarProducto('${p.id}')" class="btn btn-success">Guardar</button>
+                                    <button onclick="App.toggleEditProducto('${p.id}')" class="btn btn-secondary">Cancelar</button>
                                 </div>
                             </div>
                         </div>
@@ -477,7 +492,7 @@ const App = {
         
         const resultado = document.getElementById('productoResultado');
         
-        if (!nombre || !precio || !stock) {
+        if (!nombre || isNaN(precio) || isNaN(stock)) {
             resultado.style.display = 'block';
             resultado.style.background = '#f8d7da';
             resultado.style.color = '#721c24';
@@ -519,8 +534,10 @@ const App = {
                 this.cargarProductos();
                 
                 // Cerrar formulario
-                document.getElementById('formAgregarProducto').classList.remove('visible');
-                document.getElementById('btnToggleFormProducto').innerHTML = '<span>➕</span><span>Agregar Producto</span>';
+                const formProducto = document.getElementById('formAgregarProducto');
+                const btnToggle = document.getElementById('btnToggleFormProducto');
+                formProducto.classList.remove('visible');
+                btnToggle.innerHTML = '<span>➕</span><span>Agregar Producto</span>';
             } else {
                 resultado.style.background = '#f8d7da';
                 resultado.style.color = '#721c24';
@@ -539,7 +556,7 @@ const App = {
         const precio = parseFloat(document.getElementById(`editPrecio-${id}`)?.value);
         const stock = parseInt(document.getElementById(`editStock-${id}`)?.value);
         
-        if (!nombre || !precio || !stock) {
+        if (!nombre || isNaN(precio) || isNaN(stock)) {
             alert('❌ Todos los campos son obligatorios');
             return;
         }
