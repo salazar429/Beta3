@@ -1,5 +1,5 @@
 // ===========================================
-// APP DUEÑO - VERSIÓN CON FUNCIONES GLOBALES
+// APP DUEÑO - CON SPLASH SCREEN Y PUNTO DE CONEXIÓN
 // ===========================================
 
 const API_URL = 'https://sistema-test-api.onrender.com';
@@ -32,7 +32,6 @@ function toggleFormProducto() {
 }
 
 function switchPage(page) {
-    // Actualizar menú
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
         if (item.dataset.page === page) {
@@ -40,181 +39,107 @@ function switchPage(page) {
         }
     });
     
-    // Mostrar sección
     document.querySelectorAll('.page-section').forEach(section => {
         section.classList.remove('active');
     });
     document.getElementById(`${page}Section`).classList.add('active');
-    
-    // Controlar buscador
-    const searchContainer = document.getElementById('searchContainer');
-    if (page === 'vendedoras' || page === 'productos') {
-        searchContainer.classList.add('visible');
-        App.updateFilterTabs(page);
-        document.getElementById('searchInput').value = '';
-    } else {
-        searchContainer.classList.remove('visible');
-    }
     
     App.currentPage = page;
 }
 
 // ========== OBJETO APP CON TODA LA LÓGICA ==========
 const App = {
-    productoActual: null,
     currentPage: 'dashboard',
+    online: navigator.onLine,
+    sincronizando: false,
     
     init() {
-        console.log('App iniciada');
-        this.testServerConnection();
-        this.setupSearch();
-        this.setupDataManagementButtons();
+        console.log('👑 App Dueño iniciada');
+        this.hideSplashScreen();
+        this.setupConnectionListener();
+        this.verificarConexion();
+        this.cargarVendedoras();
+        this.cargarProductos();
+        this.setupEventListeners();
     },
     
-    // ========== BÚSQUEDA ==========
-    setupSearch() {
-        const searchInput = document.getElementById('searchInput');
-        const searchBtn = document.getElementById('searchBtn');
-        
-        const performSearch = () => {
-            const term = searchInput.value.toLowerCase();
-            if (this.currentPage === 'vendedoras') {
-                this.filterVendedoras(term);
-            } else if (this.currentPage === 'productos') {
-                this.filterProductos(term);
+    // ===== SPLASH SCREEN =====
+    hideSplashScreen() {
+        setTimeout(() => {
+            const splash = document.getElementById('splashScreen');
+            if (splash) {
+                splash.classList.add('hidden');
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    document.getElementById('mainHeader').style.display = 'block';
+                }, 500);
             }
-        };
-        
-        if (searchInput) searchInput.addEventListener('input', performSearch);
-        if (searchBtn) searchBtn.addEventListener('click', performSearch);
+        }, 2000);
     },
     
-    updateFilterTabs(page) {
-        const filterTabs = document.getElementById('filterTabs');
-        if (!filterTabs) return;
+    // ===== ESTADO DE CONEXIÓN =====
+    setupConnectionListener() {
+        window.addEventListener('online', () => {
+            this.online = true;
+            this.actualizarEstadoConexion();
+            this.mostrarNotificacion('📶 Conexión restablecida');
+            this.verificarConexion();
+        });
         
-        if (page === 'vendedoras') {
-            filterTabs.innerHTML = `
-                <button class="filter-btn active" data-filter="todos">Todos</button>
-                <button class="filter-btn" data-filter="activa">Activas</button>
-                <button class="filter-btn" data-filter="inactiva">Inactivas</button>
-            `;
-            filterTabs.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    filterTabs.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    this.filterVendedorasByStatus(btn.dataset.filter);
-                });
-            });
-        } else if (page === 'productos') {
-            filterTabs.innerHTML = `
-                <button class="filter-btn active" data-filter="todos">Todos</button>
-                <button class="filter-btn" data-filter="disponible">Disponibles</button>
-                <button class="filter-btn" data-filter="bajo-stock">Bajo Stock</button>
-            `;
-            filterTabs.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    filterTabs.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    this.filterProductosByStatus(btn.dataset.filter);
-                });
-            });
-        }
-    },
-    
-    filterVendedoras(term) {
-        const cards = document.querySelectorAll('#vendedorasContainer .vendedora-card');
-        cards.forEach(card => {
-            const nombre = card.querySelector('.vendedora-name')?.textContent.toLowerCase() || '';
-            const usuario = card.querySelector('.vendedora-user')?.textContent.toLowerCase() || '';
-            const tienda = card.querySelector('.detail-value')?.textContent.toLowerCase() || '';
-            
-            if (nombre.includes(term) || usuario.includes(term) || tienda.includes(term)) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
+        window.addEventListener('offline', () => {
+            this.online = false;
+            this.actualizarEstadoConexion();
+            this.mostrarNotificacion('📴 Sin conexión - Modo offline');
         });
     },
     
-    filterVendedorasByStatus(status) {
-        const cards = document.querySelectorAll('#vendedorasContainer .vendedora-card');
-        if (status === 'todos') {
-            cards.forEach(card => card.style.display = 'block');
+    actualizarEstadoConexion() {
+        const dot = document.getElementById('connectionDot');
+        if (!dot) return;
+        
+        dot.className = 'connection-dot';
+        
+        if (this.sincronizando) {
+            dot.classList.add('syncing');
+            dot.title = 'Sincronizando...';
+        } else if (this.online) {
+            dot.classList.add('online');
+            dot.title = 'Conectado';
+        } else {
+            dot.classList.add('offline');
+            dot.title = 'Sin conexión';
+        }
+    },
+    
+    async verificarConexion() {
+        if (!this.online) {
+            this.actualizarEstadoConexion();
             return;
         }
         
-        cards.forEach(card => {
-            const statusBadge = card.querySelector('.vendedora-status');
-            if (statusBadge && statusBadge.textContent.toLowerCase() === status) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-    },
-    
-    filterProductos(term) {
-        const cards = document.querySelectorAll('#productosContainer .producto-card');
-        cards.forEach(card => {
-            const nombre = card.querySelector('.producto-name')?.textContent.toLowerCase() || '';
-            if (nombre.includes(term)) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-    },
-    
-    filterProductosByStatus(status) {
-        const cards = document.querySelectorAll('#productosContainer .producto-card');
-        if (status === 'todos') {
-            cards.forEach(card => card.style.display = 'block');
-            return;
-        }
+        this.sincronizando = true;
+        this.actualizarEstadoConexion();
         
-        cards.forEach(card => {
-            const stockEl = card.querySelector('.detail-value.stock-danger, .detail-value:not(.stock-danger)');
-            const stock = parseInt(stockEl?.textContent || '0');
-            
-            if (status === 'disponible' && stock > 5) {
-                card.style.display = 'block';
-            } else if (status === 'bajo-stock' && stock <= 5) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-    },
-    
-    // ========== BOTONES DE GESTIÓN ==========
-    setupDataManagementButtons() {
-        // Ya tienen onclick inline
-    },
-    
-    // ========== SERVIDOR ==========
-    async testServerConnection() {
-        const statusDiv = document.getElementById('serverStatus');
         try {
             const response = await fetch(API_URL);
             if (response.ok) {
                 const data = await response.json();
-                statusDiv.className = 'status online';
-                statusDiv.innerHTML = `✅ Conectado al servidor - ${data.mensaje} (Vendedoras: ${data.vendedoras}, Productos: ${data.productos})`;
-                
-                this.cargarVendedoras();
-                this.cargarProductos();
-            } else {
-                throw new Error('Error en respuesta');
+                console.log(`✅ Servidor OK - ${data.productos} productos, ${data.vendedoras} vendedoras`);
             }
         } catch (error) {
-            console.error('Error conectando al servidor:', error);
-            statusDiv.className = 'status offline';
-            statusDiv.innerHTML = '❌ NO HAY CONEXIÓN CON EL SERVIDOR - Verifica que Render esté activo';
+            console.log('❌ Error conectando al servidor');
+        } finally {
+            this.sincronizando = false;
+            this.actualizarEstadoConexion();
         }
     },
     
-    // ========== VENDEDORAS ==========
+    // ===== SERVIDOR =====
+    async testServerConnection() {
+        await this.verificarConexion();
+    },
+    
+    // ===== VENDEDORAS =====
     async cargarVendedoras() {
         const container = document.getElementById('vendedorasContainer');
         const countSpan = document.getElementById('vendedorasCount');
@@ -342,6 +267,7 @@ const App = {
             
             if (response.ok) {
                 this.cargarVendedoras();
+                this.mostrarNotificacion('✅ Vendedora eliminada');
             }
         } catch (error) {
             console.error('Error eliminando vendedora:', error);
@@ -349,7 +275,7 @@ const App = {
         }
     },
     
-    // ========== PRODUCTOS ==========
+    // ===== PRODUCTOS =====
     async cargarProductos() {
         const container = document.getElementById('productosContainer');
         const countSpan = document.getElementById('productosCount');
@@ -476,8 +402,7 @@ const App = {
                     categoria, 
                     precio, 
                     stock, 
-                    minStock,
-                    status: stock > minStock ? 'disponible' : 'bajo-stock'
+                    minStock
                 })
             });
             
@@ -530,7 +455,7 @@ const App = {
             
             if (response.ok) {
                 this.cargarProductos();
-                alert('✅ Producto actualizado correctamente');
+                this.mostrarNotificacion('✅ Producto actualizado correctamente');
             }
         } catch (error) {
             console.error('Error actualizando producto:', error);
@@ -548,11 +473,28 @@ const App = {
             
             if (response.ok) {
                 this.cargarProductos();
+                this.mostrarNotificacion('✅ Producto eliminado');
             }
         } catch (error) {
             console.error('Error eliminando producto:', error);
             alert('❌ Error eliminando producto');
         }
+    },
+    
+    // ===== NOTIFICACIONES =====
+    mostrarNotificacion(mensaje) {
+        const notif = document.getElementById('notification');
+        if (notif) {
+            notif.style.display = 'block';
+            notif.textContent = mensaje;
+            setTimeout(() => {
+                notif.style.display = 'none';
+            }, 3000);
+        }
+    },
+    
+    setupEventListeners() {
+        document.getElementById('btnTestServer')?.addEventListener('click', () => this.testServerConnection());
     }
 };
 
