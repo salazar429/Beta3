@@ -3,82 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dueño - TEST</title>
+    <title>Dueño - Sistema de Gestión</title>
+    <meta name="description" content="Sistema de gestión PWA para dueños">
+    <meta name="theme-color" content="#8e44ad">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest_dueno.json">
+    
+    <!-- Iconos para Apple -->
+    <link rel="apple-touch-icon" href="icons/dueno-icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <!-- Estilos profesionales -->
     <link rel="stylesheet" href="styles_dueño (1).css">
+    
     <style>
-        .page-section { display: none; }
-        .page-section.active { display: block; }
-        .search-container { display: none; }
-        .search-container.visible { display: block; }
-        #formAgregarVendedora, #formAgregarProducto { display: none; }
-        .edit-producto-form { display: none; }
-        .edit-producto-form.visible { display: block; }
-        @media (max-width: 768px) {
-            .grid-2 { grid-template-columns: 1fr !important; }
+        /* ===== SPLASH SCREEN - IDÉNTICO AL DE VENDEDORAS ===== */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            color: white;
+            text-align: center;
+            padding: 20px;
         }
+        
+        .splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        
+        .splash-icon {
+            font-size: 6rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+        
+        .splash-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .splash-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        .splash-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Ocultar secciones por defecto */
+        .page-section {
+            display: none;
+        }
+        .page-section.active {
+            display: block;
+        }
+        
+        /* Buscador oculto por defecto */
+        .search-container {
+            display: none;
+        }
+        .search-container.visible {
+            display: block;
+        }
+        
+        /* Formulario de agregar oculto por defecto */
+        #formAgregarVendedora,
+        #formAgregarProducto {
+            display: none;
+        }
+        #formAgregarVendedora.visible,
+        #formAgregarProducto.visible {
+            display: block;
+        }
+        
+        /* Campos de edición de producto ocultos por defecto */
+        .edit-producto-form {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .edit-producto-form.visible {
+            display: block;
+        }
+        
+        /* Ajustes para móvil */
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        
+        /* Spinner */
         .spinner {
-            width: 40px; height: 40px;
+            width: 40px;
+            height: 40px;
             border: 4px solid #f3f3f3;
             border-top: 4px solid #9b59b6;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        
+        /* Estado del servidor - punto en el header */
+        .connection-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 12px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .connection-dot.online {
+            background-color: #2ecc71;
+            box-shadow: 0 0 8px #2ecc71;
+            animation: pulse-green 2s infinite;
+        }
+        
+        .connection-dot.offline {
+            background-color: #e74c3c;
+            box-shadow: 0 0 8px #e74c3c;
+        }
+        
+        .connection-dot.syncing {
+            background-color: #f39c12;
+            box-shadow: 0 0 8px #f39c12;
+            animation: pulse-orange 1s infinite;
+        }
+        
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+        }
+        
+        @keyframes pulse-orange {
+            0% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(243, 156, 18, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0); }
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            position: relative;
         }
     </style>
 </head>
 <body>
-    <header>
+    <!-- ===== SPLASH SCREEN - IDÉNTICO AL DE VENDEDORAS ===== -->
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-icon">👑</div>
+        <div class="splash-title">Sistema Dueño</div>
+        <div class="splash-subtitle">Gestión de Vendedoras y Productos</div>
+        <div class="splash-spinner"></div>
+    </div>
+
+    <!-- Header -->
+    <header id="mainHeader" style="display: none;">
         <div class="header-container">
             <div class="logo">
                 <span>👑</span>
-                <h1>Sistema Dueño - TEST</h1>
+                <h1>Sistema Dueño</h1>
             </div>
             <div class="user-info">
                 <span id="userName">Administrador</span>
                 <div class="avatar" id="userAvatar">AD</div>
+                <!-- PUNTO DE ESTADO DE CONEXIÓN -->
+                <div id="connectionDot" class="connection-dot online" title="Conectado"></div>
             </div>
         </div>
     </header>
 
-    <!-- Barra de búsqueda -->
-    <div class="search-container" id="searchContainer">
-        <div class="search-box">
-            <input type="text" id="searchInput" class="search-input" placeholder="Buscar...">
-            <button id="searchBtn" class="search-btn">🔍</button>
-        </div>
-        <div class="filter-tabs" id="filterTabs"></div>
-    </div>
-
+    <!-- Contenido principal -->
     <main>
-        <!-- ========== DASHBOARD ========== -->
+        <!-- ========== SECCIÓN DASHBOARD ========== -->
         <div id="dashboardSection" class="page-section active">
-            <div class="card" style="margin-bottom: 20px;">
-                <div id="serverStatus" class="status online">
-                    🔍 Verificando conexión con servidor...
-                </div>
-            </div>
+            <!-- Gestión de Datos -->
             <div class="card data-management">
-                <h3 class="section-title">Gestión de Datos</h3>
+                <h3 class="section-title">Panel de Control</h3>
                 <div class="data-actions">
-                    <button class="btn btn-primary" onclick="alert('Falta implementación')">📥 Exportar Datos</button>
-                    <label class="btn btn-secondary" onclick="alert('Falta implementación')">📤 Importar Datos</label>
-                    <button class="btn btn-warning" onclick="alert('Falta implementación')">🔄 Sincronizar Productos</button>
-                    <button class="btn btn-danger" onclick="alert('Falta implementación')">🗑️ Limpiar Datos</button>
+                    <button class="btn btn-primary" id="exportDataBtn" onclick="alert('Falta implementación')">
+                        <span>📥</span>
+                        <span>Exportar Datos</span>
+                    </button>
+                    <label class="btn btn-secondary" id="importDataLabel" onclick="alert('Falta implementación')">
+                        <span>📤</span>
+                        <span>Importar Datos</span>
+                        <input type="file" id="importDataInput" accept=".json" style="display: none;">
+                    </label>
+                    <button class="btn btn-warning" id="syncAllBtn" onclick="alert('Falta implementación')">
+                        <span>🔄</span>
+                        <span>Sincronizar</span>
+                    </button>
+                    <button class="btn btn-danger" id="clearDataBtn" onclick="alert('Falta implementación')">
+                        <span>🗑️</span>
+                        <span>Limpiar Datos</span>
+                    </button>
                 </div>
                 <div class="data-info">
-                    <p>📊 <strong>Persistencia de datos activa</strong> - Los datos se guardan automáticamente</p>
-                    <p>💾 <strong>Backup automático</strong> - Se crean copias de seguridad cada 5 minutos</p>
-                    <p>🔒 <strong>Datos locales</strong> - Toda la información se almacena en este dispositivo</p>
+                    <p>📊 <strong>Sistema de Gestión</strong> - Administra vendedoras y productos</p>
+                    <p>💾 <strong>Datos persistentes</strong> - Los cambios se guardan automáticamente</p>
                 </div>
             </div>
         </div>
 
-        <!-- ========== VENDEDORAS ========== -->
+        <!-- ========== SECCIÓN VENDEDORAS ========== -->
         <div id="vendedorasSection" class="page-section">
             <div class="card">
                 <div class="section-header">
@@ -117,6 +282,7 @@
                 </div>
             </div>
 
+            <!-- Lista de vendedoras -->
             <div class="card">
                 <div class="section-header">
                     <h3 class="section-title">Vendedoras Registradas</h3>
@@ -132,7 +298,7 @@
             </div>
         </div>
 
-        <!-- ========== PRODUCTOS ========== -->
+        <!-- ========== SECCIÓN PRODUCTOS ========== -->
         <div id="productosSection" class="page-section">
             <div class="card">
                 <div class="section-header">
@@ -182,6 +348,7 @@
                 </div>
             </div>
 
+            <!-- Lista de productos -->
             <div class="card">
                 <div class="section-header">
                     <h3 class="section-title">Productos Disponibles</h3>
@@ -198,11 +365,13 @@
             </div>
         </div>
 
-        <!-- ========== REPORTES ========== -->
+        <!-- ========== SECCIÓN REPORTES ========== -->
         <div id="reportesSection" class="page-section">
             <div class="card">
                 <div class="section-header">
-                    <h2 class="section-title">📋 Reportes</h2>
+                    <h2 class="section-title">
+                        📋 Reportes
+                    </h2>
                 </div>
                 <div style="text-align: center; padding: 60px 20px; color: #7f8c8d;">
                     <span style="font-size: 3rem; display: block; margin-bottom: 20px;">📊</span>
@@ -234,6 +403,7 @@
         </a>
     </nav>
 
+    <!-- Notificación -->
     <div id="notification" class="notification" style="display: none;"></div>
 
     <script src="app_dueño.js"></script>
