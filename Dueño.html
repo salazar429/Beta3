@@ -382,6 +382,52 @@
             </div>
         </div>
     </main>
+    <!-- ========== SECCIÓN CATEGORÍAS (NUEVA) ========== -->
+<div id="categoriasSection" class="page-section">
+    <div class="card">
+        <div class="section-header">
+            <h2 class="section-title">
+                🏷️ Gestión de Categorías
+                <span id="categoriasCount">(0 categorías)</span>
+            </h2>
+            <button id="btnToggleFormCategoria" class="btn btn-primary" onclick="toggleFormCategoria()">
+                <span>➕</span>
+                <span>Nueva Categoría</span>
+            </button>
+        </div>
+        
+        <!-- Formulario de agregar categoría -->
+        <div id="formAgregarCategoria" style="display: none;">
+            <div class="card" style="margin-top: 10px; background: #f8f9fa;">
+                <div class="form-group">
+                    <label>Nombre de la categoría *</label>
+                    <input type="text" id="categoriaNombre" class="form-control" placeholder="Ej: Electrónica">
+                </div>
+                <div class="form-group">
+                    <label>Descripción (opcional)</label>
+                    <textarea id="categoriaDescripcion" class="form-control" rows="2" placeholder="Descripción de la categoría"></textarea>
+                </div>
+                <button id="btnGuardarCategoria" class="btn btn-primary" style="width: 100%;" onclick="App.guardarCategoria()">💾 Guardar Categoría</button>
+                <div id="categoriaResultado" style="margin-top: 15px; display: none; padding: 10px; border-radius: var(--border-radius);"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de categorías -->
+    <div class="card">
+        <div class="section-header">
+            <h3 class="section-title">Categorías Registradas</h3>
+        </div>
+        <div id="categoriasContainer">
+            <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+                Cargando categorías...
+            </div>
+        </div>
+        <div style="margin-top: 20px; text-align: center;">
+            <button id="btnCargarCategorias" class="btn btn-primary" onclick="App.cargarCategorias()">🔄 Cargar Categorías</button>
+        </div>
+    </div>
+</div>
 
     <!-- Menú inferior -->
     <nav class="bottom-nav">
@@ -401,6 +447,10 @@
             <span class="nav-icon">📋</span>
             <span class="nav-label">Reportes</span>
         </a>
+        <a href="#" class="nav-item" data-page="categorias" onclick="switchPage('categorias'); return false;">
+    <span class="nav-icon">🏷️</span>
+    <span class="nav-label">Categorías</span>
+</a>
     </nav>
 
     <!-- Notificación -->
@@ -409,3 +459,4 @@
     <script src="app_dueño.js"></script>
 </body>
 </html>
+
