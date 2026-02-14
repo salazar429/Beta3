@@ -1,6 +1,5 @@
 // ===========================================
-// APP DUEÑO - VERSIÓN CORREGIDA
-// CON CARGA AUTOMÁTICA DE CATEGORÍAS
+// APP DUEÑO - VERSIÓN CON CARGAS AUTOMÁTICAS
 // ===========================================
 
 const API_URL = 'https://sistema-test-api.onrender.com';
@@ -65,7 +64,7 @@ function switchPage(page) {
         App.cargarCategorias();
     } else if (page === 'productos') {
         App.cargarProductos();
-        App.cargarCategoriasParaSelect(); // ¡Importante!
+        App.cargarCategoriasParaSelect();
     } else if (page === 'vendedoras') {
         App.cargarVendedoras();
     }
@@ -77,15 +76,20 @@ const App = {
     online: navigator.onLine,
     sincronizando: false,
     
-    init() {
+    async init() {
         console.log('👑 App Dueño iniciada');
         this.hideSplashScreen();
         this.setupConnectionListener();
         this.verificarConexion();
-        this.cargarVendedoras();
-        this.cargarProductos();
-        this.cargarCategorias(); // ✅ CARGA AUTOMÁTICA
-        this.cargarCategoriasParaSelect(); // ✅ CARGA SELECTOR
+        
+        // Pequeño retraso para asegurar DOM
+        setTimeout(() => {
+            this.cargarVendedoras();
+            this.cargarProductos();
+            this.cargarCategorias();
+            this.cargarCategoriasParaSelect();
+        }, 300);
+        
         this.setupEventListeners();
     },
     
@@ -165,17 +169,28 @@ const App = {
     },
     
     // ===== CATEGORÍAS =====
-    async cargarCategorias() {
+    async cargarCategorias(intentos = 0) {
         const container = document.getElementById('categoriasContainer');
         const countSpan = document.getElementById('categoriasCount');
         
-        if (!container) return;
+        if (!container) {
+            if (intentos < 5) {
+                setTimeout(() => this.cargarCategorias(intentos + 1), 200);
+                return;
+            }
+            return;
+        }
         
         // Mostrar indicador de carga
         container.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="spinner" style="display: inline-block;"></div><p style="margin-top: 10px; color: #7f8c8d;">Cargando categorías...</p></div>';
         
         try {
             const response = await fetch(`${API_URL}/api/dueno/categorias`);
+            
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            
             const categorias = await response.json();
             
             if (countSpan) countSpan.innerText = `(${categorias.length} categorías)`;
@@ -228,45 +243,42 @@ const App = {
             
             container.innerHTML = html;
             
-            // Actualizar también el selector de categorías en productos
+            // Actualizar selector después de cargar categorías
             this.cargarCategoriasParaSelect();
             
         } catch (error) {
             console.error('Error cargando categorías:', error);
-            if (container) container.innerHTML = '<div style="text-align: center; padding: 40px; color: #e74c3c;">❌ Error cargando categorías</div>';
+            container.innerHTML = '<div style="text-align: center; padding: 40px; color: #e74c3c;">❌ Error cargando categorías. <br><br><button class="btn btn-primary" onclick="App.cargarCategorias()">Reintentar</button></div>';
         }
     },
     
-    async cargarCategoriasParaSelect() {
+    async cargarCategoriasParaSelect(intentos = 0) {
         try {
+            const select = document.getElementById('productoCategoria');
+            if (!select) {
+                if (intentos < 5) {
+                    setTimeout(() => this.cargarCategoriasParaSelect(intentos + 1), 300);
+                    return;
+                }
+                return;
+            }
+            
             const response = await fetch(`${API_URL}/api/categorias`);
             const categorias = await response.json();
             
-            // Actualizar selector en formulario de producto
-            const select = document.getElementById('productoCategoria');
-            if (select) {
-                let options = '<option value="">Sin categoría</option>';
-                categorias.forEach(c => {
-                    options += `<option value="${c.id}">${c.nombre}</option>`;
-                });
-                select.innerHTML = options;
-            }
-            
-            // También actualizar los selects de edición de productos
-            document.querySelectorAll('[id^="editCategoria-"]').forEach(select => {
-                const productoId = select.id.replace('editCategoria-', '');
-                const categoriaActual = select.getAttribute('data-categoria-actual');
-                
-                let options = '<option value="">Sin categoría</option>';
-                categorias.forEach(c => {
-                    const selected = (c.id === categoriaActual) ? 'selected' : '';
-                    options += `<option value="${c.id}" ${selected}>${c.nombre}</option>`;
-                });
-                select.innerHTML = options;
+            let options = '<option value="">Sin categoría</option>';
+            categorias.forEach(c => {
+                options += `<option value="${c.id}">${c.nombre}</option>`;
             });
+            select.innerHTML = options;
+            
+            console.log(`✅ Selector actualizado con ${categorias.length} categorías`);
             
         } catch (error) {
             console.error('Error cargando categorías para select:', error);
+            if (intentos < 3) {
+                setTimeout(() => this.cargarCategoriasParaSelect(intentos + 1), 1000);
+            }
         }
     },
     
@@ -355,7 +367,6 @@ const App = {
                 this.cargarCategorias();
                 this.cargarCategoriasParaSelect();
                 
-                // Cerrar formulario
                 document.getElementById('formAgregarCategoria').style.display = 'none';
                 document.getElementById('btnToggleFormCategoria').innerHTML = '<span>➕</span><span>Nueva Categoría</span>';
                 
@@ -416,7 +427,6 @@ const App = {
                 return;
             }
             
-            // Ordenar: primero inactivas, luego activas
             const ordenadas = [...vendedoras].sort((a, b) => {
                 if (a.status === 'inactiva' && b.status === 'activa') return -1;
                 if (a.status === 'activa' && b.status === 'inactiva') return 1;
@@ -621,8 +631,7 @@ const App = {
             
             container.innerHTML = html;
             
-            // Cargar categorías para los selects después de renderizar
-            await this.cargarCategoriasParaSelect();
+            this.cargarCategoriasParaSelect();
             
         } catch (error) {
             console.error('Error cargando productos:', error);
@@ -633,11 +642,7 @@ const App = {
     toggleEditProducto(id) {
         const form = document.getElementById(`edit-form-${id}`);
         if (form) {
-            if (form.style.display === 'none' || form.style.display === '') {
-                form.style.display = 'block';
-            } else {
-                form.style.display = 'none';
-            }
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
         }
     },
     
