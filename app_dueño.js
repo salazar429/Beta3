@@ -1,5 +1,6 @@
 // ===========================================
-// APP DUEÑO - VERSIÓN CON CARGAS AUTOMÁTICAS
+// APP DUEÑO - VERSIÓN COMPLETA
+// CON REPORTES RECIBIDOS Y GESTIÓN COMPLETA
 // ===========================================
 
 const API_URL = 'https://sistema-test-api.onrender.com';
@@ -67,6 +68,8 @@ function switchPage(page) {
         App.cargarCategoriasParaSelect();
     } else if (page === 'vendedoras') {
         App.cargarVendedoras();
+    } else if (page === 'reportes') {
+        App.cargarReportes();
     }
 }
 
@@ -88,6 +91,7 @@ const App = {
             this.cargarProductos();
             this.cargarCategorias();
             this.cargarCategoriasParaSelect();
+            this.cargarReportes(); // ✅ Cargar reportes al inicio
         }, 300);
         
         this.setupEventListeners();
@@ -166,6 +170,135 @@ const App = {
     
     async testServerConnection() {
         await this.verificarConexion();
+    },
+    
+    // ===== REPORTES RECIBIDOS =====
+    async cargarReportes() {
+        const container = document.getElementById('reportesContainer');
+        const countSpan = document.getElementById('reportesCount');
+        
+        if (!container) return;
+        
+        // Mostrar indicador de carga
+        container.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="spinner" style="display: inline-block;"></div><p style="margin-top: 10px; color: #7f8c8d;">Cargando reportes...</p></div>';
+        
+        try {
+            const response = await fetch(`${API_URL}/api/reportes`);
+            const reportes = await response.json();
+            
+            if (countSpan) countSpan.innerText = `(${reportes.length} reportes)`;
+            
+            if (!reportes || reportes.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 60px 20px; color: #7f8c8d;"><span style="font-size: 3rem; display: block; margin-bottom: 20px;">📊</span><h3 style="margin-bottom: 15px; color: #34495e;">No hay reportes</h3><p>Las vendedoras enviarán reportes aquí</p></div>';
+                return;
+            }
+            
+            // Ordenar por fecha (más reciente primero)
+            reportes.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            let html = '';
+            reportes.forEach(r => {
+                const fecha = new Date(r.fecha).toLocaleString();
+                const fechaReporte = new Date(r.fechaReporte).toLocaleDateString();
+                
+                html += `
+                    <div class="card" style="margin-bottom: 15px; border-left: 5px solid #3498db;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                            <div>
+                                <h3 style="margin: 0; color: #2c3e50;">${r.titulo}</h3>
+                                <p style="margin: 5px 0; color: #666; font-size: 0.9rem;">
+                                    📅 Recibido: ${fecha}<br>
+                                    📆 Reporte del: ${fechaReporte}
+                                </p>
+                            </div>
+                            <span style="background: #3498db; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem;">
+                                ${r.vendedora}
+                            </span>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin: 10px 0;">
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center;">
+                                <div>
+                                    <div style="font-size: 0.8rem; color: #666;">Completadas</div>
+                                    <div style="font-weight: bold; font-size: 1.2rem;">${r.resumen.ventasCompletadas}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.8rem; color: #666;">Total</div>
+                                    <div style="font-weight: bold; color: #2ecc71;">$${r.resumen.totalCompletado.toFixed(2)}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.8rem; color: #666;">Pendientes</div>
+                                    <div style="font-weight: bold; font-size: 1.2rem;">${r.resumen.ventasPendientes}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.8rem; color: #666;">Pendiente $</div>
+                                    <div style="font-weight: bold; color: #f39c12;">$${r.resumen.totalPendiente.toFixed(2)}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <details style="margin-top: 10px;">
+                            <summary style="color: #3498db; cursor: pointer; font-weight: 600;">Ver detalles</summary>
+                            <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                                <h4 style="margin: 10px 0 5px; color: #2ecc71;">✅ Ventas Completadas</h4>
+                                ${r.ventas.map(v => `
+                                    <div style="border-bottom: 1px dashed #ddd; padding: 5px 0;">
+                                        <div style="font-weight: 600;">${v.cliente} - $${v.total.toFixed(2)}</div>
+                                        <div style="font-size: 0.8rem; color: #666;">
+                                            ${v.productos.map(p => `${p.nombre} x${p.cantidad}`).join(', ')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                                
+                                <h4 style="margin: 15px 0 5px; color: #f39c12;">⏳ Ventas Pendientes</h4>
+                                ${r.pendientes.map(v => `
+                                    <div style="border-bottom: 1px dashed #ddd; padding: 5px 0;">
+                                        <div style="font-weight: 600;">${v.cliente} - $${v.total.toFixed(2)}</div>
+                                        <div style="font-size: 0.8rem; color: #666;">
+                                            ${v.productos.map(p => `${p.nombre} x${p.cantidad}`).join(', ')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </details>
+                        
+                        <div style="margin-top: 15px; text-align: right;">
+                            <button class="btn btn-sm btn-danger" onclick="App.eliminarReporte('${r.id}')">
+                                🗑️ Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            
+        } catch (error) {
+            console.error('Error cargando reportes:', error);
+            container.innerHTML = '<div style="text-align: center; padding: 40px; color: #e74c3c;">❌ Error cargando reportes</div>';
+        }
+    },
+    
+    async eliminarReporte(id) {
+        if (!confirm('¿Eliminar este reporte?')) return;
+        
+        try {
+            const response = await fetch(`${API_URL}/api/reportes/${id}`, {
+                method: 'DELETE'
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                this.mostrarNotificacion('✅ Reporte eliminado');
+                this.cargarReportes();
+            } else {
+                this.mostrarNotificacion('❌ Error al eliminar');
+            }
+        } catch (error) {
+            console.error('Error eliminando reporte:', error);
+            this.mostrarNotificacion('❌ Error de conexión');
+        }
     },
     
     // ===== CATEGORÍAS =====
