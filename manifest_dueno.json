@@ -2,7 +2,7 @@
   "name": "Sistema Dueño - Gestión de Vendedoras",
   "short_name": "Dueño",
   "description": "Panel de control para administrar vendedoras, productos y reportes",
-  "start_url": "/Beta3/Dueño/Dueño.html",
+  "start_url": "/Beta3/Dueño",
   "display": "standalone",
   "background_color": "#8e44ad",
   "theme_color": "#8e44ad",
