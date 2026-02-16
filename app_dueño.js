@@ -1,6 +1,6 @@
 // ===========================================
 // APP DUEÑO - VERSIÓN COMPLETA
-// CON REPORTES RECIBIDOS Y GESTIÓN COMPLETA
+// CON INSTALACIÓN FORZADA PWA
 // ===========================================
 
 const API_URL = 'https://sistema-test-api.onrender.com';
@@ -78,11 +78,20 @@ const App = {
     currentPage: 'dashboard',
     online: navigator.onLine,
     sincronizando: false,
+    installPromptEvent: null,
     
     async init() {
         console.log('👑 App Dueño iniciada');
+        
+        // Verificar si ya está instalada como PWA
+        if (this.isPWAInstalled()) {
+            console.log('📱 App ejecutándose en modo standalone');
+            document.getElementById('installButton').style.display = 'none';
+        }
+        
         this.hideSplashScreen();
         this.setupConnectionListener();
+        this.setupForcedInstall(); // Instalación forzada
         this.verificarConexion();
         
         // Pequeño retraso para asegurar DOM
@@ -91,10 +100,110 @@ const App = {
             this.cargarProductos();
             this.cargarCategorias();
             this.cargarCategoriasParaSelect();
-            this.cargarReportes(); // ✅ Cargar reportes al inicio
+            this.cargarReportes();
         }, 300);
         
         this.setupEventListeners();
+    },
+    
+    // ===== INSTALACIÓN FORZADA PWA =====
+    setupForcedInstall() {
+        const installButton = document.getElementById('installButton');
+        
+        // Capturar el evento beforeinstallprompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            this.installPromptEvent = e;
+            console.log('📲 PWA lista para instalar');
+            
+            // Mostrar botón si no está instalada
+            if (!this.isPWAInstalled()) {
+                installButton.style.display = 'flex';
+            }
+        });
+        
+        // Forzar instalación al hacer clic
+        installButton.addEventListener('click', async () => {
+            await this.forceInstallPWA();
+        });
+        
+        // Detectar instalación exitosa
+        window.addEventListener('appinstalled', () => {
+            this.installPromptEvent = null;
+            installButton.style.display = 'none';
+            this.mostrarNotificacion('✅ App instalada correctamente');
+            console.log('✅ PWA instalada');
+        });
+    },
+    
+    async forceInstallPWA() {
+        const installButton = document.getElementById('installButton');
+        
+        // Si ya está instalada
+        if (this.isPWAInstalled()) {
+            this.mostrarNotificacion('📱 La app ya está instalada');
+            installButton.style.display = 'none';
+            return;
+        }
+        
+        // Si tenemos el evento de instalación
+        if (this.installPromptEvent) {
+            installButton.style.display = 'none';
+            
+            // Mostrar el prompt de instalación
+            this.installPromptEvent.prompt();
+            
+            // Esperar respuesta
+            const { outcome } = await this.installPromptEvent.userChoice;
+            
+            if (outcome === 'accepted') {
+                this.mostrarNotificacion('✅ Instalando aplicación...');
+            } else {
+                this.mostrarNotificacion('❌ Instalación cancelada');
+                // Reaparecer botón después de 3 segundos
+                setTimeout(() => {
+                    if (!this.isPWAInstalled()) {
+                        installButton.style.display = 'flex';
+                    }
+                }, 3000);
+            }
+            
+            this.installPromptEvent = null;
+        } else {
+            // Si no hay evento, intentar métodos alternativos
+            this.tryAlternativeInstall();
+        }
+    },
+    
+    tryAlternativeInstall() {
+        const installButton = document.getElementById('installButton');
+        
+        // Detectar plataforma
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isAndroid = /Android/.test(navigator.userAgent);
+        
+        if (isIOS) {
+            this.mostrarNotificacion('🍎 En iOS: Menú Compartir > Añadir a Pantalla de Inicio', 5000);
+        } else if (isAndroid) {
+            // Intentar abrir menú de Chrome
+            this.mostrarNotificacion('📱 Toca los 3 puntos > Instalar aplicación', 4000);
+            
+            // Mostrar botón de nuevo después
+            setTimeout(() => {
+                if (!this.isPWAInstalled()) {
+                    installButton.style.display = 'flex';
+                }
+            }, 4000);
+        } else {
+            this.mostrarNotificacion('❌ La instalación no está disponible ahora. Intenta más tarde', 3000);
+        }
+    },
+    
+    isPWAInstalled() {
+        return window.matchMedia('(display-mode: standalone)').matches || 
+               window.navigator.standalone === true ||
+               window.matchMedia('(display-mode: fullscreen)').matches ||
+               window.matchMedia('(display-mode: minimal-ui)').matches;
     },
     
     // ===== SPLASH SCREEN =====
@@ -899,14 +1008,14 @@ const App = {
     },
     
     // ===== NOTIFICACIONES =====
-    mostrarNotificacion(mensaje) {
+    mostrarNotificacion(mensaje, duracion = 3000) {
         const notif = document.getElementById('notification');
         if (notif) {
             notif.style.display = 'block';
             notif.textContent = mensaje;
             setTimeout(() => {
                 notif.style.display = 'none';
-            }, 3000);
+            }, duracion);
         }
     },
     
