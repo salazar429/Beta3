@@ -91,9 +91,9 @@ const App = {
         
         this.hideSplashScreen();
         this.setupConnectionListener();
-        this.setupForcedInstall(); // Instalación pwa
+        this.setupForcedInstall();
         this.verificarConexion();
-        this.registerServiceWorker() //uso de service worker
+        await this.registerServiceWorker();
         
         // Pequeño retraso para asegurar DOM
         setTimeout(() => {
@@ -105,61 +105,62 @@ const App = {
         }, 300);
         
         this.setupEventListeners();
-        // ===== SERVICE WORKER =====
-async registerServiceWorker() {
-    if ('serviceWorker' in navigator) {
-        try {
-            const registration = await navigator.serviceWorker.register('/Beta3/sw.js', {
-                scope: '/Beta3/'
-            });
-            
-            console.log('✅ Service Worker registrado con scope:', registration.scope);
-            
-            // Verificar si hay una nueva versión esperando
-            registration.addEventListener('updatefound', () => {
-                const newWorker = registration.installing;
-                console.log('🔄 Nueva versión del Service Worker detectada');
+    },
+    
+    // ===== SERVICE WORKER =====
+    async registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            try {
+                const registration = await navigator.serviceWorker.register('/Beta3/sw.js', {
+                    scope: '/Beta3/'
+                });
                 
-                newWorker.addEventListener('statechange', () => {
-                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        // Nueva versión instalada, preguntar si actualizar
-                        this.mostrarNotificacion('🔄 Nueva versión disponible. Recarga para actualizar.', 8000);
+                console.log('✅ Service Worker registrado con scope:', registration.scope);
+                
+                // Verificar si hay una nueva versión esperando
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    console.log('🔄 Nueva versión del Service Worker detectada');
+                    
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // Nueva versión instalada, preguntar si actualizar
+                            this.mostrarNotificacion('🔄 Nueva versión disponible. Recarga para actualizar.', 8000);
+                        }
+                    });
+                });
+                
+                // Detectar cuando hay conexión y actualizar
+                window.addEventListener('online', () => {
+                    if (registration.waiting) {
+                        registration.waiting.postMessage('skipWaiting');
                     }
                 });
-            });
-            
-            // Detectar cuando hay conexión y actualizar
-            window.addEventListener('online', () => {
-                if (registration.waiting) {
-                    registration.waiting.postMessage('skipWaiting');
-                }
-            });
-            
-        } catch (error) {
-            console.error('❌ Error registrando Service Worker:', error);
-            this.mostrarNotificacion('❌ Error al registrar soporte offline');
+                
+            } catch (error) {
+                console.error('❌ Error registrando Service Worker:', error);
+                this.mostrarNotificacion('❌ Error al registrar soporte offline');
+            }
+        } else {
+            console.log('⚠️ Service Workers no soportados');
         }
-    } else {
-        console.log('⚠️ Service Workers no soportados');
-    }
-},
+    },
 
-// Método para limpiar cache manualmente (opcional)
-async limpiarCache() {
-    if ('caches' in window) {
-        const confirmar = confirm('¿Limpiar cache? Se descargarán los datos frescos al reconectar.');
-        if (!confirmar) return;
-        
-        try {
-            await caches.delete('dueno-api-cache-v1');
-            this.mostrarNotificacion('✅ Cache limpiado. Los datos se recargarán.');
-            setTimeout(() => window.location.reload(), 1500);
-        } catch (error) {
-            console.error('Error limpiando cache:', error);
-            this.mostrarNotificacion('❌ Error al limpiar cache');
+    // Método para limpiar cache manualmente (opcional)
+    async limpiarCache() {
+        if ('caches' in window) {
+            const confirmar = confirm('¿Limpiar cache? Se descargarán los datos frescos al reconectar.');
+            if (!confirmar) return;
+            
+            try {
+                await caches.delete('dueno-api-cache-v1');
+                this.mostrarNotificacion('✅ Cache limpiado. Los datos se recargarán.');
+                setTimeout(() => window.location.reload(), 1500);
+            } catch (error) {
+                console.error('Error limpiando cache:', error);
+                this.mostrarNotificacion('❌ Error al limpiar cache');
+            }
         }
-    }
-}
     },
     
     // ===== INSTALACIÓN FORZADA PWA =====
